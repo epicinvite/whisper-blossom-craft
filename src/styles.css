@@ -145,7 +145,11 @@
   }
 
   body {
-    background-color: var(--color-background);
+    background-color: #050a1a;
+    background-image:
+      radial-gradient(ellipse at 50% 30%, oklch(0.28 0.10 265) 0%, oklch(0.14 0.06 265) 45%, #050a1a 100%);
+    background-attachment: fixed;
     color: var(--color-foreground);
+    font-family: var(--font-sans);
   }
 }
