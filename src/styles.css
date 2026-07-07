@@ -2,6 +2,12 @@
 @source "../src";
 @import "tw-animate-css";
 
+@theme inline {
+  --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /*
