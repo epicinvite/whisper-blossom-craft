@@ -83,7 +83,7 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
 function Nav() {
   const items = [
     ["About", "#about"], ["Details", "#details"], ["Ceremonies", "#ceremonies"],
-    ["RSVP", "#rsvp"], ["Wishes", "#wishes"], ["Gallery", "#gallery"], ["Gift", "#gift"],
+    ["RSVP", "#rsvp"], ["Wishes", "#wishes"], ["Chat", "#minichat"], ["Gallery", "#gallery"], ["Gift", "#gift"],
   ];
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/30 border-b border-border/40">
