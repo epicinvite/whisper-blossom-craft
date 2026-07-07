@@ -214,6 +214,19 @@ function Details() {
             Get Directions
           </a>
         </div>
+
+        <div className="mt-14 max-w-4xl mx-auto rounded-2xl overflow-hidden border border-border bg-card backdrop-blur-md shadow-lg">
+          <iframe
+            title="Green Coral Resort Map"
+            src="https://maps.google.com/maps?q=Green+Coral+Resort,+351+Quino,+Batangas+City,+Batangas,+Philippines&t=m&z=15&ie=UTF8&iwloc=&output=embed"
+            width="100%"
+            height="400"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
       </div>
     </section>
   );
