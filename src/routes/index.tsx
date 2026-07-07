@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import gallery1 from "@/assets/gallery-1.jpg.asset.json";
+import gallery2 from "@/assets/gallery-2.jpg.asset.json";
+import gallery3 from "@/assets/gallery-3.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -16,12 +19,12 @@ const roses = [
 ];
 
 const galleryImgs = [
-  "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=750&fit=crop&auto=format",
-  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=450&fit=crop&auto=format",
-  "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&h=680&fit=crop&auto=format",
-  "https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=600&h=520&fit=crop&auto=format",
-  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=750&fit=crop&auto=format",
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=600&fit=crop&auto=format",
+  gallery1.url,
+  gallery2.url,
+  gallery3.url,
+  gallery1.url,
+  gallery2.url,
+  gallery3.url,
 ];
 
 const wishes = [
