@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import gallery1 from "@/assets/gallery-1.jpg.asset.json";
 import gallery2 from "@/assets/gallery-2.jpg.asset.json";
 import gallery3 from "@/assets/gallery-3.jpg.asset.json";
+import celebrantAsset from "@/assets/celebrant.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Index,
