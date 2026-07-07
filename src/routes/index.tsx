@@ -214,6 +214,19 @@ function Details() {
             Get Directions
           </a>
         </div>
+
+        <div className="mt-14 max-w-4xl mx-auto rounded-2xl overflow-hidden border border-border bg-card backdrop-blur-md shadow-lg">
+          <iframe
+            title="Green Coral Resort Map"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3885.1234567890123!2d121.0594!3d13.7565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd1234567890ab%3A0xabcdef1234567890!2sGreen%20Coral%20Resort!5e0!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph"
+            width="100%"
+            height="400"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
       </div>
     </section>
   );
