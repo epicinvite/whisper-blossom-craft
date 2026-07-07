@@ -430,6 +430,93 @@ function Gift() {
   );
 }
 
+function MiniChat() {
+  type Msg = { id: number; user: string; text: string; time: string; self?: boolean };
+  const [name, setName] = useState("");
+  const [text, setText] = useState("");
+  const [msgs, setMsgs] = useState<Msg[]>([
+    { id: 1, user: "Ana", text: "So excited for August 22! 💙", time: "10:04 AM" },
+    { id: 2, user: "Carlo", text: "Can't wait to celebrate with Sheintel! 🥂", time: "10:06 AM" },
+    { id: 3, user: "Maria", text: "Formal with a touch of blue — noted! ✨", time: "10:12 AM" },
+  ]);
+  const online = 24;
+
+  const send = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    const now = new Date();
+    const time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    setMsgs(m => [...m, { id: Date.now(), user: name.trim() || "Guest", text: text.trim(), time, self: true }]);
+    setText("");
+  };
+
+  return (
+    <section id="minichat" className="py-24 px-6">
+      <div className="max-w-4xl mx-auto">
+        <SectionHeading eyebrow="Chat With Fellow Guests" title="Mini Chat" />
+        <div className="rounded-3xl border border-border bg-card backdrop-blur-md overflow-hidden shadow-2xl">
+          <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-border bg-primary/10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground grid place-items-center font-serif text-lg">S</div>
+              <div>
+                <div className="font-serif text-lg leading-tight">Sheintel's Soirée Lounge</div>
+                <div className="text-[10px] tracking-[0.3em] uppercase text-primary/80 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  {online} guests online
+                </div>
+              </div>
+            </div>
+            <span className="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-primary/70">Live</span>
+          </div>
+
+          <div className="h-[380px] overflow-y-auto px-5 py-6 space-y-4 bg-background/40">
+            {msgs.map(m => (
+              <div key={m.id} className={`flex ${m.self ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[75%] rounded-2xl px-4 py-3 border ${
+                  m.self
+                    ? "bg-primary text-primary-foreground border-primary rounded-br-sm"
+                    : "bg-card text-foreground border-border rounded-bl-sm"
+                }`}>
+                  <div className={`text-[10px] tracking-[0.25em] uppercase mb-1 ${m.self ? "text-primary-foreground/70" : "text-primary/80"}`}>
+                    {m.user} · {m.time}
+                  </div>
+                  <div className="text-sm leading-relaxed">{m.text}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <form onSubmit={send} className="border-t border-border p-4 bg-card/60 backdrop-blur-md">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Your name"
+                className="sm:w-40 rounded-full bg-input border border-border px-4 py-3 text-sm outline-none focus:border-primary"
+              />
+              <input
+                value={text}
+                onChange={e => setText(e.target.value)}
+                placeholder="Say something lovely to Sheintel & guests…"
+                className="flex-1 rounded-full bg-input border border-border px-4 py-3 text-sm outline-none focus:border-primary"
+              />
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition"
+              >
+                Send
+              </button>
+            </div>
+            <p className="text-[10px] tracking-[0.3em] uppercase text-foreground/50 mt-3 text-center">
+              Be kind · Keep it classy · Midnight blue vibes only 💙
+            </p>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Index() {
   return (
     <main className="min-h-screen text-foreground overflow-x-hidden">
@@ -441,6 +528,7 @@ function Index() {
       <Ceremonies />
       <Rsvp />
       <Wishes />
+      <MiniChat />
       <Gallery />
       <Gift />
     </main>
