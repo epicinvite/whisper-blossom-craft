@@ -149,7 +149,7 @@ function About() {
           <div className="relative">
             <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" />
             <img
-              src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop&auto=format"
+              src={celebrantAsset.url}
               alt="Portrait of Sheintel"
               className="relative rounded-2xl w-full object-cover aspect-[3/4] border border-border"
             />
