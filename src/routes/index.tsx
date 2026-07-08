@@ -26,9 +26,9 @@ const galleryImgs = [
   gallery1.url,
   gallery2.url,
   gallery3.url,
-  gallery1.url,
-  gallery2.url,
-  gallery3.url,
+  gallery4.url,
+  gallery5.url,
+  gallery6.url,
 ];
 
 const wishes = [
