@@ -14,12 +14,36 @@ export const Route = createFileRoute("/")({
 
 const EVENT_DATE = new Date("2026-08-22T18:00:00+08:00");
 
+const perfumes = [
+  "Lyka Santos", "Charlene Malavega", "Iriesh Ebrada", "Lena Tolentino",
+  "Trisha Acob", "Gail Bacsa", "Kytelyn Sison", "Paola Marco",
+  "Cazzandra Seno", "Jade Carandang", "Paris Selda", "Alexandra Nardo",
+  "Khey Cabral", "Jennifer Cruz", "Roswell Salazar", "Tita Jessa Mae Sison",
+  "Ate Irish Kaye Macatangay", "Trisha Kate Suarez",
+];
+
+const treasures = [
+  "Althea Espino", "Jhasmine Antenor", "Benedict Dimaano", "Earl Jhon Mhar",
+  "Cymon Cerda", "Dj Hernandez", "Bench Evangelista", "Christine Guda",
+  "Chrisma Abuan", "Ma'am Yvonna", "Ma'am Annalouse Noble", "Ma'am Marife Agdan",
+  "Ma'am Emmaruth Castillo", "Zeus bisa", "Ryle Zariel", "Kristelle Macalood",
+  "Laumar Recaro", "Aaliyah Noreen Alejandro",
+];
+
+const bills = [
+  "Tita Zelle Montiano", "Tita Beng Montiano", "Tita Maricel Pineda", "Daddy Joseph Pintor",
+  "Ninang Maureen Pintor", "Ninong Edelwin Pintor", "Ninong Mike Pintor", "Tito We Pintor",
+  "Tito Jaypee Pintor", "Tita Jane Rubia", "Ate Ruth Ann Araman", "Papa Aeron Dreje",
+  "Ate Khei Alambra", "Tita Krizel Pangan", "Tito Nico Gutrriez", "Tita Laila Macatangay",
+  "Ka (tito) Henry Alamag", "Papa John john Alejandro",
+];
+
 const roses = [
   "Tito Ado Montiano", "Tito Mak Montiano", "Daddy Joseph Pintor", "Tito JE Sison",
   "Papa Hernando Alejandro", "Kuya Makmak Montiano", "Jhayden Pintor", "Allan Jay Araman",
   "Kuya Jano Casihan", "Bamboo Realo", "Vhon Neijhel Sison", "Shen Jawili",
-  "Aeron Alejandro", "Kuya Andrew Mabunga", "Zeus Bisa", "Gave Pineda",
-  "Tatay Boy Montiano", "Papa John John Alejandro",
+  "Aeron Alejandro", "Kuya Andrew Mabunga", "Lolo Eddie Sison", "Gave Pineda",
+  "Tatay Boy Montiano", "Papa John john Alejandro",
 ];
 
 const galleryImgs = [
