@@ -7,6 +7,9 @@ import gallery4 from "@/assets/gallery-4.jpg.asset.json";
 import gallery5 from "@/assets/gallery-5.jpg.asset.json";
 import gallery6 from "@/assets/gallery-6.jpg.asset.json";
 import celebrantAsset from "@/assets/celebrant.jpg.asset.json";
+import outfitMen from "@/assets/outfit-men.png.asset.json";
+import outfitWomen from "@/assets/outfit-women.png.asset.json";
+import outfitAccessories from "@/assets/outfit-accessories.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Index,
