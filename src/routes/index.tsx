@@ -14,12 +14,36 @@ export const Route = createFileRoute("/")({
 
 const EVENT_DATE = new Date("2026-08-22T18:00:00+08:00");
 
+const perfumes = [
+  "Lyka Santos", "Charlene Malavega", "Iriesh Ebrada", "Lena Tolentino",
+  "Trisha Acob", "Gail Bacsa", "Kytelyn Sison", "Paola Marco",
+  "Cazzandra Seno", "Jade Carandang", "Paris Selda", "Alexandra Nardo",
+  "Khey Cabral", "Jennifer Cruz", "Roswell Salazar", "Tita Jessa Mae Sison",
+  "Ate Irish Kaye Macatangay", "Trisha Kate Suarez",
+];
+
+const treasures = [
+  "Althea Espino", "Jhasmine Antenor", "Benedict Dimaano", "Earl Jhon Mhar",
+  "Cymon Cerda", "Dj Hernandez", "Bench Evangelista", "Christine Guda",
+  "Chrisma Abuan", "Ma'am Yvonna", "Ma'am Annalouse Noble", "Ma'am Marife Agdan",
+  "Ma'am Emmaruth Castillo", "Zeus bisa", "Ryle Zariel", "Kristelle Macalood",
+  "Laumar Recaro", "Aaliyah Noreen Alejandro",
+];
+
+const bills = [
+  "Tita Zelle Montiano", "Tita Beng Montiano", "Tita Maricel Pineda", "Daddy Joseph Pintor",
+  "Ninang Maureen Pintor", "Ninong Edelwin Pintor", "Ninong Mike Pintor", "Tito We Pintor",
+  "Tito Jaypee Pintor", "Tita Jane Rubia", "Ate Ruth Ann Araman", "Papa Aeron Dreje",
+  "Ate Khei Alambra", "Tita Krizel Pangan", "Tito Nico Gutrriez", "Tita Laila Macatangay",
+  "Ka (tito) Henry Alamag", "Papa John john Alejandro",
+];
+
 const roses = [
   "Tito Ado Montiano", "Tito Mak Montiano", "Daddy Joseph Pintor", "Tito JE Sison",
   "Papa Hernando Alejandro", "Kuya Makmak Montiano", "Jhayden Pintor", "Allan Jay Araman",
   "Kuya Jano Casihan", "Bamboo Realo", "Vhon Neijhel Sison", "Shen Jawili",
-  "Aeron Alejandro", "Kuya Andrew Mabunga", "Zeus Bisa", "Gave Pineda",
-  "Tatay Boy Montiano", "Papa John John Alejandro",
+  "Aeron Alejandro", "Kuya Andrew Mabunga", "Lolo Eddie Sison", "Gave Pineda",
+  "Tatay Boy Montiano", "Papa John john Alejandro",
 ];
 
 const galleryImgs = [
@@ -265,30 +289,54 @@ function Outfits() {
   );
 }
 
+function CeremonyColumn({ title, description, names }: { title: string; description: string; names: string[] }) {
+  return (
+    <div className="text-center px-2">
+      <h3 className="font-serif text-3xl md:text-4xl text-primary mb-3">{title}</h3>
+      <p className="italic text-foreground/70 text-sm leading-relaxed max-w-xs mx-auto mb-4">
+        {description}
+      </p>
+      <div className="font-script text-2xl text-primary/80 tracking-widest mb-5">~ ~ ~ ~ ~ ~ ~</div>
+      <ul className="space-y-1.5">
+        {names.map((name) => (
+          <li key={name} className="font-serif text-base md:text-lg text-foreground/90">{name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Ceremonies() {
+  const ceremonies = [
+    {
+      title: "18 Perfume",
+      description: "Eighteen special ladies who will each offer a spritz of fragrance, representing the sweet memories and well-wishes that will follow the debutante into womanhood.",
+      names: perfumes,
+    },
+    {
+      title: "18 Treasure",
+      description: "Eighteen cherished friends and family who will present meaningful gifts, symbolizing love, support, and treasured blessings for the debutante's journey ahead.",
+      names: treasures,
+    },
+    {
+      title: "18 Bills",
+      description: "Eighteen significant loved ones who will share bills as a token of prosperity, abundance, and practical blessings for the debutante's bright future.",
+      names: bills,
+    },
+    {
+      title: "18 Roses",
+      description: "Eighteen special men who will each present a single rose to the debutante, symbolizing respect, admiration, and love.",
+      names: roses,
+    },
+  ];
+
   return (
     <section id="ceremonies" className="py-24 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionHeading eyebrow="Sacred Traditions" title="The 18 Ceremonies" />
-        <div className="flex flex-wrap justify-center gap-3 mb-14 text-xs tracking-[0.2em] uppercase">
-          {["🌹 18 Roses", "🌸 18 Perfumes", "💎 18 Treasures", "💛 18 Bills"].map(t => (
-            <span key={t} className="px-5 py-2 rounded-full border border-primary/40 bg-card">{t}</span>
-          ))}
-        </div>
-        <div className="text-center mb-10">
-          <div className="text-3xl mb-3">🌹</div>
-          <h3 className="font-serif text-3xl mb-3">18 Roses</h3>
-          <p className="text-foreground/70 max-w-2xl mx-auto">
-            Eighteen special men who will each present a single rose to the debutante, symbolizing respect, admiration, and love.
-          </p>
-        </div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {roses.map((name, i) => (
-            <div key={name} className="rounded-xl border border-border bg-card backdrop-blur-sm p-5 text-center hover:border-primary/50 transition">
-              <div className="text-2xl mb-2">🌹</div>
-              <div className="text-sm font-medium">{name}</div>
-              <div className="text-[10px] tracking-[0.3em] uppercase text-primary/70 mt-2">No. {i + 1}</div>
-            </div>
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
+          {ceremonies.map((c) => (
+            <CeremonyColumn key={c.title} title={c.title} description={c.description} names={c.names} />
           ))}
         </div>
       </div>
