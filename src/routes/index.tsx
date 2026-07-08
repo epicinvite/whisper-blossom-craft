@@ -264,9 +264,9 @@ function Details() {
 
 function Outfits() {
   const items = [
-    { img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=620&fit=crop&auto=format", tag: "Navy Blue Suit", title: "Men's Formal", desc: "A tailored midnight or navy blue suit with crisp white shirt. Add a gold pocket square and sapphire cufflinks for the perfect accent." },
-    { img: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=500&h=620&fit=crop&auto=format", tag: "Blue Evening Gown", title: "Women's Elegance", desc: "A floor-length royal blue or cobalt evening gown in satin or chiffon. Let the color speak; keep jewelry minimal and gold." },
-    { img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&h=620&fit=crop&auto=format", tag: "Accessorize Beautifully", title: "Blue Accents", desc: "Prefer neutral gowns or suits? Add navy ties, sapphire earrings, royal blue heels, or a cobalt clutch for the dress code." },
+    { img: outfitMen.url, tag: "Navy Blue Suit", title: "Men's Formal", desc: "A tailored midnight or navy blue suit with crisp white shirt. Add a gold pocket square and sapphire cufflinks for the perfect accent." },
+    { img: outfitWomen.url, tag: "Blue Evening Gown", title: "Women's Elegance", desc: "A floor-length royal blue or cobalt evening gown in satin or chiffon. Let the color speak; keep jewelry minimal and gold." },
+    { img: outfitAccessories.url, tag: "Accessorize Beautifully", title: "Blue Accents", desc: "Prefer neutral gowns or suits? Add navy ties, sapphire earrings, royal blue heels, or a cobalt clutch for the dress code." },
   ];
   return (
     <section id="outfits" className="py-24 px-6">
