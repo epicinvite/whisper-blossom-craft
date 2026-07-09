@@ -80,6 +80,11 @@ const galleryImgs = [
   gallery5.url,
   gallery6.url,
   gallery7.url,
+  gallery8.url,
+  gallery9.url,
+  gallery10.url,
+  gallery11.url,
+  gallery12.url,
 ];
 
 const wishes = [
