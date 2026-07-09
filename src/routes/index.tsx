@@ -1,15 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import {
+  Sparkles,
+  CalendarDays,
+  Clock,
+  MapPin,
+  Shirt,
+  Gem,
+  Heart,
+  Star,
+  Flower2,
+  PartyPopper,
+  QrCode,
+  Send,
+  Check,
+  Feather,
+} from "lucide-react";
 import gallery1 from "@/assets/gallery-1.jpg.asset.json";
 import gallery2 from "@/assets/gallery-2.jpg.asset.json";
 import gallery3 from "@/assets/gallery-3.jpg.asset.json";
 import gallery4 from "@/assets/gallery-4.jpg.asset.json";
 import gallery5 from "@/assets/gallery-5.jpg.asset.json";
 import gallery6 from "@/assets/gallery-6.jpg.asset.json";
+import gallery7 from "@/assets/gallery-7.jpg.asset.json";
 import celebrantAsset from "@/assets/celebrant.jpg.asset.json";
 import outfitMen from "@/assets/outfit-men.png.asset.json";
 import outfitWomen from "@/assets/outfit-women.png.asset.json";
 import outfitAccessories from "@/assets/outfit-accessories.png.asset.json";
+import GoldConfetti from "@/components/GoldConfetti";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -56,13 +74,16 @@ const galleryImgs = [
   gallery4.url,
   gallery5.url,
   gallery6.url,
+  gallery7.url,
 ];
 
 const wishes = [
-  { emoji: "🌹", name: "Maria Santos", msg: "Happy 18th, Sheintel! Wishing you a lifetime of joy, adventure, and love. You deserve every beautiful thing this world has to offer! 🌟", date: "June 30, 2026" },
-  { emoji: "✨", name: "Ana Reyes", msg: "You have blossomed into the most incredible young woman. May your 18th year be the most magical chapter yet! ✨", date: "July 2, 2026" },
-  { emoji: "💫", name: "Carlo Dela Cruz", msg: "Happy 18th! May your dreams soar like butterflies, free and beautiful. So proud of the person you have become! 🦋", date: "July 4, 2026" },
+  { icon: Flower2, name: "Maria Santos", msg: "Happy 18th, Sheintel! Wishing you a lifetime of joy, adventure, and love. You deserve every beautiful thing this world has to offer!", date: "June 30, 2026" },
+  { icon: Sparkles, name: "Ana Reyes", msg: "You have blossomed into the most incredible young woman. May your 18th year be the most magical chapter yet!", date: "July 2, 2026" },
+  { icon: Star, name: "Carlo Dela Cruz", msg: "Happy 18th! May your dreams soar like butterflies, free and beautiful. So proud of the person you have become!", date: "July 4, 2026" },
 ];
+
+const wishIconPalette = [Heart, Sparkles, Star, Flower2, Gem, PartyPopper, Feather, Send];
 
 function useCountdown() {
   const [now, setNow] = useState<number>(() => Date.now());
@@ -84,7 +105,7 @@ function Divider() {
   return (
     <div className="flex items-center justify-center gap-3 text-primary/70">
       <span className="h-px w-16 bg-primary/40" />
-      <span className="text-sm">✦</span>
+      <Sparkles className="w-4 h-4" strokeWidth={1.5} />
       <span className="h-px w-16 bg-primary/40" />
     </div>
   );
@@ -92,8 +113,10 @@ function Divider() {
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-primary/80 tracking-[0.35em] uppercase text-xs mb-3">
-      ✦ {children} ✦
+    <p className="text-primary/80 tracking-[0.35em] uppercase text-xs mb-3 inline-flex items-center gap-2 justify-center">
+      <Sparkles className="w-3 h-3" strokeWidth={1.5} />
+      <span>{children}</span>
+      <Sparkles className="w-3 h-3" strokeWidth={1.5} />
     </p>
   );
 }
@@ -131,6 +154,11 @@ function Hero() {
   const boxes = [
     ["Days", c.days], ["Hours", c.hours], ["Minutes", c.minutes], ["Seconds", c.seconds],
   ] as const;
+  const pills = [
+    { Icon: CalendarDays, label: "August 22, 2026" },
+    { Icon: Clock, label: "6:00 PM Onwards" },
+    { Icon: MapPin, label: "Green Coral, Batangas City" },
+  ];
   return (
     <section className="relative min-h-screen flex items-center justify-center px-6 pt-24 pb-16 text-center">
       <div className="max-w-4xl mx-auto">
@@ -144,9 +172,12 @@ function Hero() {
           "A New Chapter Begins"
         </p>
         <div className="flex flex-wrap justify-center gap-3 mb-12 text-sm">
-          <span className="px-4 py-2 rounded-full border border-border bg-card backdrop-blur-sm">📅 August 22, 2026</span>
-          <span className="px-4 py-2 rounded-full border border-border bg-card backdrop-blur-sm">🕕 6:00 PM Onwards</span>
-          <span className="px-4 py-2 rounded-full border border-border bg-card backdrop-blur-sm">📍 Green Coral, Batangas City</span>
+          {pills.map(({ Icon, label }) => (
+            <span key={label} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card backdrop-blur-sm">
+              <Icon className="w-4 h-4 text-primary" strokeWidth={1.5} />
+              {label}
+            </span>
+          ))}
         </div>
         <p className="text-primary/80 tracking-[0.35em] uppercase text-xs mb-6">Counting Down To The Celebration</p>
         <div className="grid grid-cols-4 gap-3 md:gap-5 max-w-2xl mx-auto mb-12">
@@ -215,10 +246,10 @@ function About() {
 
 function Details() {
   const items = [
-    { icon: "📅", label: "Date", primary: "August 22, 2026", sub: "Saturday" },
-    { icon: "🕕", label: "Time", primary: "6:00 PM", sub: "Doors open at 5:30 PM" },
-    { icon: "📍", label: "Venue", primary: "Green Coral", sub: "351 Quino, Batangas City" },
-    { icon: "🎀", label: "Dress Code", primary: "Formal", sub: "With a Touch of Blue" },
+    { Icon: CalendarDays, label: "Date", primary: "August 22, 2026", sub: "Saturday" },
+    { Icon: Clock, label: "Time", primary: "6:00 PM", sub: "Doors open at 5:30 PM" },
+    { Icon: MapPin, label: "Venue", primary: "Green Coral", sub: "351 Quino, Batangas City" },
+    { Icon: Shirt, label: "Dress Code", primary: "Formal", sub: "With a Touch of Blue" },
   ];
   return (
     <section id="details" className="py-24 px-6">
@@ -227,7 +258,9 @@ function Details() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {items.map(i => (
             <div key={i.label} className="rounded-2xl border border-border bg-card backdrop-blur-md p-8 text-center hover:border-primary/50 transition">
-              <div className="text-3xl mb-3">{i.icon}</div>
+              <div className="mb-4 flex justify-center">
+                <i.Icon className="w-8 h-8 text-primary" strokeWidth={1.5} />
+              </div>
               <div className="text-xs tracking-[0.3em] uppercase text-primary/80 mb-3">{i.label}</div>
               <div className="font-serif text-2xl mb-1">{i.primary}</div>
               <div className="text-sm text-foreground/60">{i.sub}</div>
@@ -381,8 +414,8 @@ function Rsvp() {
             <label className="block">
               <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Attendance *</span>
               <select required className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary">
-                <option>✓ Yes, I'll be there!</option>
-                <option>✗ Unable to attend</option>
+                <option>Yes, I'll be there</option>
+                <option>Unable to attend</option>
               </select>
             </label>
           </div>
@@ -390,8 +423,15 @@ function Rsvp() {
             <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Message to Celebrant</span>
             <textarea rows={4} className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
           </label>
-          <button className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition">
-            {status === "sent" ? "Thank You — See You There!" : "Confirm Attendance"}
+          <button className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2">
+            {status === "sent" ? (
+              <>
+                <Check className="w-4 h-4" strokeWidth={2} />
+                Thank You — See You There!
+              </>
+            ) : (
+              "Confirm Attendance"
+            )}
           </button>
         </form>
       </div>
@@ -405,32 +445,48 @@ function Wishes() {
       <div className="max-w-5xl mx-auto">
         <SectionHeading eyebrow="Leave Your Love" title="Birthday Wishes" />
         <div className="rounded-2xl border border-border bg-card backdrop-blur-md p-8 mb-10">
-          <h3 className="font-serif text-2xl mb-4">Leave Your Wish ✨</h3>
+          <h3 className="font-serif text-2xl mb-4 inline-flex items-center gap-2">
+            Leave Your Wish
+            <Sparkles className="w-5 h-5 text-primary" strokeWidth={1.5} />
+          </h3>
           <div className="grid md:grid-cols-2 gap-4 mb-4">
             <input placeholder="Your name" className="rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
             <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Choose Emoji</span>
+              <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Choose Icon</span>
               <div className="flex flex-wrap gap-1">
-                {"🎉 🌹 ✨ 💫 🦋 💛 🌸 💎 🎊 ❤️ 🌟 💐".split(" ").map(e => (
-                  <button key={e} type="button" className="w-9 h-9 rounded-full border border-border hover:border-primary hover:bg-primary/10 transition">{e}</button>
+                {wishIconPalette.map((Ic, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    aria-label="Choose wish icon"
+                    className="w-9 h-9 rounded-full border border-border hover:border-primary hover:bg-primary/10 transition inline-flex items-center justify-center text-primary"
+                  >
+                    <Ic className="w-4 h-4" strokeWidth={1.5} />
+                  </button>
                 ))}
               </div>
             </div>
           </div>
           <textarea rows={3} placeholder="Write your wish for Sheintel..." className="w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary mb-4" />
-          <button className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition">
+          <button className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center gap-2">
+            <Send className="w-4 h-4" strokeWidth={1.5} />
             Send My Wish
           </button>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
-          {wishes.map(w => (
-            <div key={w.name} className="rounded-2xl border border-border bg-card backdrop-blur-md p-6">
-              <div className="text-3xl mb-3">{w.emoji}</div>
-              <div className="font-serif text-xl mb-2">{w.name}</div>
-              <p className="text-foreground/75 text-sm leading-relaxed mb-4">{w.msg}</p>
-              <div className="text-[10px] tracking-[0.3em] uppercase text-primary/70">{w.date}</div>
-            </div>
-          ))}
+          {wishes.map(w => {
+            const Ic = w.icon;
+            return (
+              <div key={w.name} className="rounded-2xl border border-border bg-card backdrop-blur-md p-6">
+                <div className="mb-3 inline-flex w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
+                  <Ic className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                </div>
+                <div className="font-serif text-xl mb-2">{w.name}</div>
+                <p className="text-foreground/75 text-sm leading-relaxed mb-4">{w.msg}</p>
+                <div className="text-[10px] tracking-[0.3em] uppercase text-primary/70">{w.date}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -444,8 +500,18 @@ function Gallery() {
         <SectionHeading eyebrow="Cherished Memories" title="Celebrant Gallery" />
         <div className="columns-1 sm:columns-2 md:columns-3 gap-5 [column-fill:_balance]">
           {galleryImgs.map((src, i) => (
-            <div key={i} className="mb-5 break-inside-avoid rounded-2xl overflow-hidden border border-border bg-card backdrop-blur-md">
-              <img src={src} alt={`Memory ${i + 1}`} className="w-full object-cover hover:scale-105 transition duration-700" />
+            <div
+              key={i}
+              className="mb-5 break-inside-avoid rounded-2xl overflow-hidden border border-border bg-card backdrop-blur-md group relative transition duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(212,175,55,0.35)] hover:border-primary/50"
+            >
+              <img
+                src={src}
+                alt={`Sheintel memory ${i + 1}`}
+                loading="lazy"
+                decoding="async"
+                className="w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
             </div>
           ))}
         </div>
@@ -464,7 +530,7 @@ function Gift() {
             "Your presence is the greatest gift of all. However, if you wish to bless the celebrant with a monetary gift, you may conveniently do so using the QR code below."
           </p>
           <div className="mx-auto w-48 h-48 rounded-2xl bg-foreground/5 border border-border grid place-items-center mb-6">
-            <span className="text-6xl">📱</span>
+            <QrCode className="w-20 h-20 text-primary" strokeWidth={1.25} />
           </div>
           <div className="flex flex-wrap justify-center gap-2 mb-6 text-xs tracking-[0.25em] uppercase text-primary/80">
             <span>GCash</span><span>·</span><span>Maya</span><span>·</span><span>Bank Transfer</span>
@@ -489,9 +555,9 @@ function MiniChat() {
   const [name, setName] = useState("");
   const [text, setText] = useState("");
   const [msgs, setMsgs] = useState<Msg[]>([
-    { id: 1, user: "Ana", text: "So excited for August 22! 💙", time: "10:04 AM" },
-    { id: 2, user: "Carlo", text: "Can't wait to celebrate with Sheintel! 🥂", time: "10:06 AM" },
-    { id: 3, user: "Maria", text: "Formal with a touch of blue — noted! ✨", time: "10:12 AM" },
+    { id: 1, user: "Ana", text: "So excited for August 22!", time: "10:04 AM" },
+    { id: 2, user: "Carlo", text: "Can't wait to celebrate with Sheintel!", time: "10:06 AM" },
+    { id: 3, user: "Maria", text: "Formal with a touch of blue — noted!", time: "10:12 AM" },
   ]);
   const online = 24;
 
@@ -556,13 +622,15 @@ function MiniChat() {
               />
               <button
                 type="submit"
-                className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition"
+                className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2"
               >
+                <Send className="w-4 h-4" strokeWidth={1.5} />
                 Send
               </button>
             </div>
-            <p className="text-[10px] tracking-[0.3em] uppercase text-foreground/50 mt-3 text-center">
-              Be kind · Keep it classy · Midnight blue vibes only 💙
+            <p className="text-[10px] tracking-[0.3em] uppercase text-foreground/50 mt-3 text-center inline-flex items-center gap-2 justify-center w-full">
+              Be kind · Keep it classy · Midnight blue vibes only
+              <Heart className="w-3 h-3 text-primary" strokeWidth={1.5} />
             </p>
           </form>
         </div>
@@ -573,7 +641,8 @@ function MiniChat() {
 
 function Index() {
   return (
-    <main className="min-h-screen text-foreground overflow-x-hidden">
+    <main className="min-h-screen text-foreground overflow-x-hidden relative">
+      <GoldConfetti />
       <Nav />
       <Hero />
       <About />
