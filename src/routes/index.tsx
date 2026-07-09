@@ -14,7 +14,6 @@ import {
   QrCode,
   Send,
   Check,
-  X,
   Feather,
 } from "lucide-react";
 import gallery1 from "@/assets/gallery-1.jpg.asset.json";
