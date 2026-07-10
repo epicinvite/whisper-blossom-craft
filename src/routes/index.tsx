@@ -29,9 +29,8 @@ import gallery10 from "@/assets/gallery-10.jpg.asset.json";
 import gallery11 from "@/assets/gallery-11.jpg.asset.json";
 import gallery12 from "@/assets/gallery-12.jpg.asset.json";
 import celebrantAsset from "@/assets/celebrant.jpg.asset.json";
-import outfitMen from "@/assets/outfit-men.png.asset.json";
-import outfitWomen from "@/assets/outfit-women.png.asset.json";
-import outfitAccessories from "@/assets/outfit-accessories.png.asset.json";
+import dressMale from "@/assets/dress-male.png.asset.json";
+import dressFemale from "@/assets/dress-female.png.asset.json";
 import GoldConfetti from "@/components/GoldConfetti";
 
 export const Route = createFileRoute("/")({
@@ -66,7 +65,7 @@ const bills = [
 
 const roses = [
   "Tito Ado Montiano", "Tito Mak Montiano", "Daddy Joseph Pintor", "Tito JE Sison",
-  "Papa Hernando Alejandro", "Kuya Makmak Montiano", "Jhayden Pintor", "Allan Jay Araman",
+  "Papa Hernando Alejandro", "Kuya Makmak Montiano", "Papito Dante Pangan", "Allan Jay Araman",
   "Kuya Jano Casihan", "Bamboo Realo", "Vhon Neijhel Sison", "Shen Jawili",
   "Aeron Alejandro", "Kuya Andrew Mabunga", "Lolo Eddie Sison", "Gave Pineda",
   "Tatay Boy Montiano", "Papa John john Alejandro",
@@ -306,26 +305,44 @@ function Details() {
 }
 
 function Outfits() {
-  const items = [
-    { img: outfitMen.url, tag: "Navy Blue Suit", title: "Men's Formal", desc: "A tailored midnight or navy blue suit with crisp white shirt. Add a gold pocket square and sapphire cufflinks for the perfect accent." },
-    { img: outfitWomen.url, tag: "Blue Evening Gown", title: "Women's Elegance", desc: "A floor-length royal blue or cobalt evening gown in satin or chiffon. Let the color speak; keep jewelry minimal and gold." },
-    { img: outfitAccessories.url, tag: "Accessorize Beautifully", title: "Blue Accents", desc: "Prefer neutral gowns or suits? Add navy ties, sapphire earrings, royal blue heels, or a cobalt clutch for the dress code." },
-  ];
+  const palette = ["#D9E6F7", "#AFC9E9", "#6FA8DC", "#4B7AA5", "#2F4054"];
   return (
     <section id="outfits" className="py-24 px-6">
       <div className="max-w-6xl mx-auto">
-        <SectionHeading eyebrow="Dress to Impress" title="Outfit Inspiration" />
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map(i => (
-            <div key={i.title} className="rounded-2xl overflow-hidden border border-border bg-card backdrop-blur-md group">
-              <div className="relative aspect-[4/5] overflow-hidden">
-                <img src={i.img} alt={i.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                <span className="absolute top-4 left-4 text-xs tracking-[0.25em] uppercase text-primary bg-background/60 px-3 py-1 rounded-full">{i.tag}</span>
+        <SectionHeading eyebrow="Dress to Impress" title="Dress Code" />
+        <p className="text-center text-foreground/75 max-w-2xl mx-auto -mt-6 mb-12 leading-relaxed">
+          Formal attire with a touch of blue. Please dress in one of the shades from our palette below to keep the evening beautifully cohesive.
+        </p>
+
+        <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10 mb-16">
+          {palette.map((c) => (
+            <div key={c} className="flex flex-col items-center gap-3">
+              <span
+                className="block rounded-full ring-1 ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)]"
+                style={{ backgroundColor: c, width: 84, height: 84 }}
+                aria-label={`Palette color ${c}`}
+              />
+              <span className="text-[10px] tracking-[0.3em] uppercase text-foreground/60">{c}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 md:gap-10 max-w-3xl mx-auto">
+          {[
+            { img: dressMale.url, label: "Gentlemen" },
+            { img: dressFemale.url, label: "Ladies" },
+          ].map((d) => (
+            <div key={d.label} className="rounded-2xl border border-border bg-card backdrop-blur-md overflow-hidden">
+              <div className="aspect-[3/4] flex items-end justify-center bg-gradient-to-b from-primary/5 to-transparent p-4">
+                <img
+                  src={d.img}
+                  alt={`${d.label} formal attire illustration`}
+                  loading="lazy"
+                  className="max-h-full w-auto object-contain"
+                />
               </div>
-              <div className="p-6">
-                <h3 className="font-serif text-2xl mb-2">{i.title}</h3>
-                <p className="text-foreground/70 text-sm leading-relaxed">{i.desc}</p>
+              <div className="text-center py-4 border-t border-border">
+                <div className="text-xs tracking-[0.35em] uppercase text-primary">{d.label}</div>
               </div>
             </div>
           ))}
@@ -504,22 +521,23 @@ function Wishes() {
 }
 
 function Gallery() {
+  const imgs = galleryImgs.slice(0, 8);
   return (
     <section id="gallery" className="py-24 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionHeading eyebrow="Cherished Memories" title="Celebrant Gallery" />
-        <div className="columns-1 sm:columns-2 md:columns-3 gap-5 [column-fill:_balance]">
-          {galleryImgs.map((src, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {imgs.map((src, i) => (
             <div
               key={i}
-              className="mb-5 break-inside-avoid rounded-2xl overflow-hidden border border-border bg-card backdrop-blur-md group relative transition duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(212,175,55,0.35)] hover:border-primary/50"
+              className="rounded-2xl overflow-hidden border border-border bg-card backdrop-blur-md group relative aspect-[3/4] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] transition duration-500 hover:shadow-[0_20px_50px_-20px_rgba(212,175,55,0.35)] hover:border-primary/50"
             >
               <img
                 src={src}
                 alt={`Sheintel memory ${i + 1}`}
                 loading="lazy"
                 decoding="async"
-                className="w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+                className="w-full h-full object-cover transition duration-700 group-hover:scale-[1.08]"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
             </div>
@@ -532,10 +550,17 @@ function Gallery() {
 
 function Gift() {
   return (
-    <section id="gift" className="py-24 px-6">
-      <div className="max-w-3xl mx-auto text-center">
+    <section id="gift" className="relative py-24 px-6 overflow-hidden">
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${celebrantAsset.url})`, backgroundPosition: "center 20%" }}
+        aria-hidden
+      />
+      <div className="absolute inset-0 bg-background/80" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background/90" aria-hidden />
+      <div className="relative max-w-3xl mx-auto text-center">
         <SectionHeading eyebrow="A Generous Gesture" title="Monetary Gift" />
-        <div className="rounded-2xl border border-border bg-card backdrop-blur-md p-10">
+        <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-md p-10">
           <p className="font-serif italic text-foreground/80 text-lg mb-8">
             "Your presence is the greatest gift of all. However, if you wish to bless the celebrant with a monetary gift, you may conveniently do so using the QR code below."
           </p>
@@ -552,7 +577,7 @@ function Gift() {
             <button className="px-6 py-2 rounded-full border border-primary/60 text-primary text-xs tracking-[0.25em] uppercase hover:bg-primary/10 transition">Copy Number</button>
           </div>
         </div>
-        <p className="mt-14 text-foreground/50 text-xs tracking-[0.3em] uppercase">
+        <p className="mt-14 text-foreground/70 text-xs tracking-[0.3em] uppercase">
           With love · Sheintel · August 22, 2026
         </p>
       </div>
