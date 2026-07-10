@@ -556,8 +556,8 @@ function Gift() {
         style={{ backgroundImage: `url(${celebrantAsset.url})`, backgroundPosition: "center 20%" }}
         aria-hidden
       />
-      <div className="absolute inset-0 bg-background/80" aria-hidden />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background/90" aria-hidden />
+      <div className="absolute inset-0 bg-background/45" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/25 to-background/70" aria-hidden />
       <div className="relative max-w-3xl mx-auto text-center">
         <SectionHeading eyebrow="A Generous Gesture" title="Monetary Gift" />
         <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-md p-10">
