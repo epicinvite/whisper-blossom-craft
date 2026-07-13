@@ -645,23 +645,57 @@ function Gift() {
 }
 
 function MiniChat() {
-  type Msg = { id: number; user: string; text: string; time: string; self?: boolean };
   const [name, setName] = useState("");
   const [text, setText] = useState("");
-  const [msgs, setMsgs] = useState<Msg[]>([
-    { id: 1, user: "Ana", text: "So excited for August 22!", time: "10:04 AM" },
-    { id: 2, user: "Carlo", text: "Can't wait to celebrate with Sheintel!", time: "10:06 AM" },
-    { id: 3, user: "Maria", text: "Formal with a touch of blue — noted!", time: "10:12 AM" },
-  ]);
-  const online = 24;
+  const [msgs, setMsgs] = useState<ChatRow[]>([]);
+  const [sending, setSending] = useState(false);
+  const [selfIds, setSelfIds] = useState<Set<string>>(new Set());
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const send = (e: React.FormEvent) => {
+  useEffect(() => {
+    supabase
+      .from("chat_messages")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .limit(200)
+      .then(({ data }) => { if (data) setMsgs(data as ChatRow[]); });
+
+    const channel = supabase
+      .channel("chat-live")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+        setMsgs((prev) => {
+          const row = payload.new as ChatRow;
+          if (prev.some((p) => p.id === row.id)) return prev;
+          return [...prev, row];
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [msgs.length]);
+
+  const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim()) return;
-    const now = new Date();
-    const time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    setMsgs(m => [...m, { id: Date.now(), user: name.trim() || "Guest", text: text.trim(), time, self: true }]);
-    setText("");
+    if (!text.trim() || sending) return;
+    setSending(true);
+    const userName = (name.trim() || "Guest").slice(0, 60);
+    const body = text.trim().slice(0, 500);
+    const { data, error } = await supabase
+      .from("chat_messages")
+      .insert({ user_name: userName, text: body })
+      .select()
+      .single();
+    setSending(false);
+    if (!error && data) {
+      const row = data as ChatRow;
+      setSelfIds((s) => new Set(s).add(row.id));
+      setMsgs((prev) => (prev.some((p) => p.id === row.id) ? prev : [...prev, row]));
+      setText("");
+    }
   };
 
   return (
@@ -676,28 +710,36 @@ function MiniChat() {
                 <div className="font-serif text-lg leading-tight">Sheintel's Soirée Lounge</div>
                 <div className="text-[10px] tracking-[0.3em] uppercase text-primary/80 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  {online} guests online
+                  Live guest chat
                 </div>
               </div>
             </div>
             <span className="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-primary/70">Live</span>
           </div>
 
-          <div className="h-[380px] overflow-y-auto px-5 py-6 space-y-4 bg-background/40">
-            {msgs.map(m => (
-              <div key={m.id} className={`flex ${m.self ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[75%] rounded-2xl px-4 py-3 border ${
-                  m.self
-                    ? "bg-primary text-primary-foreground border-primary rounded-br-sm"
-                    : "bg-card text-foreground border-border rounded-bl-sm"
-                }`}>
-                  <div className={`text-[10px] tracking-[0.25em] uppercase mb-1 ${m.self ? "text-primary-foreground/70" : "text-primary/80"}`}>
-                    {m.user} · {m.time}
-                  </div>
-                  <div className="text-sm leading-relaxed">{m.text}</div>
-                </div>
+          <div ref={scrollRef} className="h-[380px] overflow-y-auto px-5 py-6 space-y-4 bg-background/40">
+            {msgs.length === 0 && (
+              <div className="text-center text-foreground/60 text-sm py-8">
+                Say something lovely — you'll be the first message in the lounge.
               </div>
-            ))}
+            )}
+            {msgs.map((m) => {
+              const self = selfIds.has(m.id);
+              return (
+                <div key={m.id} className={`flex ${self ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[75%] rounded-2xl px-4 py-3 border ${
+                    self
+                      ? "bg-primary text-primary-foreground border-primary rounded-br-sm"
+                      : "bg-card text-foreground border-border rounded-bl-sm"
+                  }`}>
+                    <div className={`text-[10px] tracking-[0.25em] uppercase mb-1 ${self ? "text-primary-foreground/70" : "text-primary/80"}`}>
+                      {m.user_name} · {formatChatTime(m.created_at)}
+                    </div>
+                    <div className="text-sm leading-relaxed">{m.text}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <form onSubmit={send} className="border-t border-border p-4 bg-card/60 backdrop-blur-md">
@@ -716,10 +758,11 @@ function MiniChat() {
               />
               <button
                 type="submit"
-                className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2"
+                disabled={sending || !text.trim()}
+                className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Send className="w-4 h-4" strokeWidth={1.5} />
-                Send
+                {sending ? "Sending…" : "Send"}
               </button>
             </div>
             <p className="text-[10px] tracking-[0.3em] uppercase text-foreground/50 mt-3 text-center inline-flex items-center gap-2 justify-center w-full">
