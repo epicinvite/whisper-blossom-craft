@@ -474,53 +474,100 @@ function Rsvp() {
 }
 
 function Wishes() {
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [icon, setIcon] = useState<WishIconName>("Heart");
+  const [sending, setSending] = useState(false);
+  const [items, setItems] = useState<WishRow[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("wishes")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(60)
+      .then(({ data }) => { if (data) setItems(data as WishRow[]); });
+
+    const channel = supabase
+      .channel("wishes-live")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "wishes" }, (payload) => {
+        setItems((prev) => {
+          const row = payload.new as WishRow;
+          if (prev.some((p) => p.id === row.id)) return prev;
+          return [row, ...prev].slice(0, 60);
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !message.trim() || sending) return;
+    setSending(true);
+    const { error } = await supabase.from("wishes").insert({ name: name.trim(), message: message.trim(), icon });
+    setSending(false);
+    if (!error) { setMessage(""); }
+  };
+
   return (
     <section id="wishes" className="py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <SectionHeading eyebrow="Leave Your Love" title="Birthday Wishes" />
-        <div className="rounded-2xl border border-border bg-card backdrop-blur-md p-8 mb-10">
+        <form onSubmit={submit} className="rounded-2xl border border-border bg-card backdrop-blur-md p-8 mb-10">
           <h3 className="font-serif text-2xl mb-4 inline-flex items-center gap-2">
             Leave Your Wish
             <Sparkles className="w-5 h-5 text-primary" strokeWidth={1.5} />
           </h3>
           <div className="grid md:grid-cols-2 gap-4 mb-4">
-            <input placeholder="Your name" className="rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
             <div className="flex flex-wrap gap-2 items-center">
               <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Choose Icon</span>
               <div className="flex flex-wrap gap-1">
-                {wishIconPalette.map((Ic, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    aria-label="Choose wish icon"
-                    className="w-9 h-9 rounded-full border border-border hover:border-primary hover:bg-primary/10 transition inline-flex items-center justify-center text-primary"
-                  >
-                    <Ic className="w-4 h-4" strokeWidth={1.5} />
-                  </button>
-                ))}
+                {wishIconPalette.map((iconName) => {
+                  const Ic = wishIconMap[iconName];
+                  const active = icon === iconName;
+                  return (
+                    <button
+                      key={iconName}
+                      type="button"
+                      onClick={() => setIcon(iconName)}
+                      aria-label={`Choose ${iconName} icon`}
+                      aria-pressed={active}
+                      className={`w-9 h-9 rounded-full border transition inline-flex items-center justify-center text-primary ${active ? "border-primary bg-primary/15" : "border-border hover:border-primary hover:bg-primary/10"}`}
+                    >
+                      <Ic className="w-4 h-4" strokeWidth={1.5} />
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
-          <textarea rows={3} placeholder="Write your wish for Sheintel..." className="w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary mb-4" />
-          <button className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center gap-2">
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} placeholder="Write your wish for Sheintel..." className="w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary mb-4" />
+          <button type="submit" disabled={sending || !name.trim() || !message.trim()} className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center gap-2 disabled:opacity-50">
             <Send className="w-4 h-4" strokeWidth={1.5} />
-            Send My Wish
+            {sending ? "Sending…" : "Send My Wish"}
           </button>
-        </div>
+        </form>
         <div className="grid md:grid-cols-3 gap-5">
-          {wishes.map(w => {
-            const Ic = w.icon;
+          {items.map((w) => {
+            const Ic = wishIconMap[(w.icon as WishIconName)] ?? Heart;
             return (
-              <div key={w.name} className="rounded-2xl border border-border bg-card backdrop-blur-md p-6">
+              <div key={w.id} className="rounded-2xl border border-border bg-card backdrop-blur-md p-6">
                 <div className="mb-3 inline-flex w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
                   <Ic className="w-5 h-5 text-primary" strokeWidth={1.5} />
                 </div>
                 <div className="font-serif text-xl mb-2">{w.name}</div>
-                <p className="text-foreground/75 text-sm leading-relaxed mb-4">{w.msg}</p>
-                <div className="text-[10px] tracking-[0.3em] uppercase text-primary/70">{w.date}</div>
+                <p className="text-foreground/75 text-sm leading-relaxed mb-4">{w.message}</p>
+                <div className="text-[10px] tracking-[0.3em] uppercase text-primary/70">{formatWishDate(w.created_at)}</div>
               </div>
             );
           })}
+          {items.length === 0 && (
+            <div className="md:col-span-3 text-center text-foreground/60 text-sm py-8">
+              Be the first to leave a birthday wish for Sheintel.
+            </div>
+          )}
         </div>
       </div>
     </section>
