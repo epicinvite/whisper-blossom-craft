@@ -627,8 +627,13 @@ function Gift() {
           <div className="font-serif text-2xl mb-1">Michelle M.</div>
           <div className="text-foreground/60 mb-6">+63 908 083 XXXX</div>
           <div className="flex flex-wrap justify-center gap-3">
-            <button className="px-6 py-2 rounded-full bg-primary text-primary-foreground text-xs tracking-[0.25em] uppercase hover:brightness-110 transition">Download QR</button>
-            <button className="px-6 py-2 rounded-full border border-primary/60 text-primary text-xs tracking-[0.25em] uppercase hover:bg-primary/10 transition">Copy Number</button>
+            <a
+              href={qrClientEpic.url}
+              download="sheintel-monetary-gift-qr.jpg"
+              className="px-6 py-2 rounded-full bg-primary text-primary-foreground text-xs tracking-[0.25em] uppercase hover:brightness-110 transition"
+            >
+              Download QR
+            </a>
           </div>
         </div>
         <p className="mt-14 text-foreground/70 text-xs tracking-[0.3em] uppercase">
