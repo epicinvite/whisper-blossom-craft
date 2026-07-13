@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Sparkles,
   CalendarDays,
@@ -32,6 +32,7 @@ import celebrantAsset from "@/assets/celebrant.jpg.asset.json";
 import dressMale from "@/assets/dress-male.png.asset.json";
 import dressFemale from "@/assets/dress-female.png.asset.json";
 import GoldConfetti from "@/components/GoldConfetti";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -86,13 +87,19 @@ const galleryImgs = [
   gallery12.url,
 ];
 
-const wishes = [
-  { icon: Flower2, name: "Maria Santos", msg: "Happy 18th, Sheintel! Wishing you a lifetime of joy, adventure, and love. You deserve every beautiful thing this world has to offer!", date: "June 30, 2026" },
-  { icon: Sparkles, name: "Ana Reyes", msg: "You have blossomed into the most incredible young woman. May your 18th year be the most magical chapter yet!", date: "July 2, 2026" },
-  { icon: Star, name: "Carlo Dela Cruz", msg: "Happy 18th! May your dreams soar like butterflies, free and beautiful. So proud of the person you have become!", date: "July 4, 2026" },
-];
+const wishIconMap = { Heart, Sparkles, Star, Flower2, Gem, PartyPopper, Feather, Send } as const;
+type WishIconName = keyof typeof wishIconMap;
+const wishIconPalette: WishIconName[] = ["Heart", "Sparkles", "Star", "Flower2", "Gem", "PartyPopper", "Feather", "Send"];
 
-const wishIconPalette = [Heart, Sparkles, Star, Flower2, Gem, PartyPopper, Feather, Send];
+type WishRow = { id: string; name: string; message: string; icon: string; created_at: string };
+type ChatRow = { id: string; user_name: string; text: string; created_at: string };
+
+function formatWishDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+}
+function formatChatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
 
 function useCountdown() {
   const [now, setNow] = useState<number>(() => Date.now());
@@ -467,53 +474,100 @@ function Rsvp() {
 }
 
 function Wishes() {
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [icon, setIcon] = useState<WishIconName>("Heart");
+  const [sending, setSending] = useState(false);
+  const [items, setItems] = useState<WishRow[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("wishes")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(60)
+      .then(({ data }) => { if (data) setItems(data as WishRow[]); });
+
+    const channel = supabase
+      .channel("wishes-live")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "wishes" }, (payload) => {
+        setItems((prev) => {
+          const row = payload.new as WishRow;
+          if (prev.some((p) => p.id === row.id)) return prev;
+          return [row, ...prev].slice(0, 60);
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !message.trim() || sending) return;
+    setSending(true);
+    const { error } = await supabase.from("wishes").insert({ name: name.trim(), message: message.trim(), icon });
+    setSending(false);
+    if (!error) { setMessage(""); }
+  };
+
   return (
     <section id="wishes" className="py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <SectionHeading eyebrow="Leave Your Love" title="Birthday Wishes" />
-        <div className="rounded-2xl border border-border bg-card backdrop-blur-md p-8 mb-10">
+        <form onSubmit={submit} className="rounded-2xl border border-border bg-card backdrop-blur-md p-8 mb-10">
           <h3 className="font-serif text-2xl mb-4 inline-flex items-center gap-2">
             Leave Your Wish
             <Sparkles className="w-5 h-5 text-primary" strokeWidth={1.5} />
           </h3>
           <div className="grid md:grid-cols-2 gap-4 mb-4">
-            <input placeholder="Your name" className="rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
             <div className="flex flex-wrap gap-2 items-center">
               <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Choose Icon</span>
               <div className="flex flex-wrap gap-1">
-                {wishIconPalette.map((Ic, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    aria-label="Choose wish icon"
-                    className="w-9 h-9 rounded-full border border-border hover:border-primary hover:bg-primary/10 transition inline-flex items-center justify-center text-primary"
-                  >
-                    <Ic className="w-4 h-4" strokeWidth={1.5} />
-                  </button>
-                ))}
+                {wishIconPalette.map((iconName) => {
+                  const Ic = wishIconMap[iconName];
+                  const active = icon === iconName;
+                  return (
+                    <button
+                      key={iconName}
+                      type="button"
+                      onClick={() => setIcon(iconName)}
+                      aria-label={`Choose ${iconName} icon`}
+                      aria-pressed={active}
+                      className={`w-9 h-9 rounded-full border transition inline-flex items-center justify-center text-primary ${active ? "border-primary bg-primary/15" : "border-border hover:border-primary hover:bg-primary/10"}`}
+                    >
+                      <Ic className="w-4 h-4" strokeWidth={1.5} />
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
-          <textarea rows={3} placeholder="Write your wish for Sheintel..." className="w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary mb-4" />
-          <button className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center gap-2">
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} placeholder="Write your wish for Sheintel..." className="w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary mb-4" />
+          <button type="submit" disabled={sending || !name.trim() || !message.trim()} className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center gap-2 disabled:opacity-50">
             <Send className="w-4 h-4" strokeWidth={1.5} />
-            Send My Wish
+            {sending ? "Sending…" : "Send My Wish"}
           </button>
-        </div>
+        </form>
         <div className="grid md:grid-cols-3 gap-5">
-          {wishes.map(w => {
-            const Ic = w.icon;
+          {items.map((w) => {
+            const Ic = wishIconMap[(w.icon as WishIconName)] ?? Heart;
             return (
-              <div key={w.name} className="rounded-2xl border border-border bg-card backdrop-blur-md p-6">
+              <div key={w.id} className="rounded-2xl border border-border bg-card backdrop-blur-md p-6">
                 <div className="mb-3 inline-flex w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
                   <Ic className="w-5 h-5 text-primary" strokeWidth={1.5} />
                 </div>
                 <div className="font-serif text-xl mb-2">{w.name}</div>
-                <p className="text-foreground/75 text-sm leading-relaxed mb-4">{w.msg}</p>
-                <div className="text-[10px] tracking-[0.3em] uppercase text-primary/70">{w.date}</div>
+                <p className="text-foreground/75 text-sm leading-relaxed mb-4">{w.message}</p>
+                <div className="text-[10px] tracking-[0.3em] uppercase text-primary/70">{formatWishDate(w.created_at)}</div>
               </div>
             );
           })}
+          {items.length === 0 && (
+            <div className="md:col-span-3 text-center text-foreground/60 text-sm py-8">
+              Be the first to leave a birthday wish for Sheintel.
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -573,8 +627,13 @@ function Gift() {
           <div className="font-serif text-2xl mb-1">Michelle M.</div>
           <div className="text-foreground/60 mb-6">+63 908 083 XXXX</div>
           <div className="flex flex-wrap justify-center gap-3">
-            <button className="px-6 py-2 rounded-full bg-primary text-primary-foreground text-xs tracking-[0.25em] uppercase hover:brightness-110 transition">Download QR</button>
-            <button className="px-6 py-2 rounded-full border border-primary/60 text-primary text-xs tracking-[0.25em] uppercase hover:bg-primary/10 transition">Copy Number</button>
+            <a
+              href={qrClientEpic.url}
+              download="sheintel-monetary-gift-qr.jpg"
+              className="px-6 py-2 rounded-full bg-primary text-primary-foreground text-xs tracking-[0.25em] uppercase hover:brightness-110 transition"
+            >
+              Download QR
+            </a>
           </div>
         </div>
         <p className="mt-14 text-foreground/70 text-xs tracking-[0.3em] uppercase">
@@ -586,23 +645,57 @@ function Gift() {
 }
 
 function MiniChat() {
-  type Msg = { id: number; user: string; text: string; time: string; self?: boolean };
   const [name, setName] = useState("");
   const [text, setText] = useState("");
-  const [msgs, setMsgs] = useState<Msg[]>([
-    { id: 1, user: "Ana", text: "So excited for August 22!", time: "10:04 AM" },
-    { id: 2, user: "Carlo", text: "Can't wait to celebrate with Sheintel!", time: "10:06 AM" },
-    { id: 3, user: "Maria", text: "Formal with a touch of blue — noted!", time: "10:12 AM" },
-  ]);
-  const online = 24;
+  const [msgs, setMsgs] = useState<ChatRow[]>([]);
+  const [sending, setSending] = useState(false);
+  const [selfIds, setSelfIds] = useState<Set<string>>(new Set());
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const send = (e: React.FormEvent) => {
+  useEffect(() => {
+    supabase
+      .from("chat_messages")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .limit(200)
+      .then(({ data }) => { if (data) setMsgs(data as ChatRow[]); });
+
+    const channel = supabase
+      .channel("chat-live")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+        setMsgs((prev) => {
+          const row = payload.new as ChatRow;
+          if (prev.some((p) => p.id === row.id)) return prev;
+          return [...prev, row];
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [msgs.length]);
+
+  const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim()) return;
-    const now = new Date();
-    const time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    setMsgs(m => [...m, { id: Date.now(), user: name.trim() || "Guest", text: text.trim(), time, self: true }]);
-    setText("");
+    if (!text.trim() || sending) return;
+    setSending(true);
+    const userName = (name.trim() || "Guest").slice(0, 60);
+    const body = text.trim().slice(0, 500);
+    const { data, error } = await supabase
+      .from("chat_messages")
+      .insert({ user_name: userName, text: body })
+      .select()
+      .single();
+    setSending(false);
+    if (!error && data) {
+      const row = data as ChatRow;
+      setSelfIds((s) => new Set(s).add(row.id));
+      setMsgs((prev) => (prev.some((p) => p.id === row.id) ? prev : [...prev, row]));
+      setText("");
+    }
   };
 
   return (
@@ -617,28 +710,36 @@ function MiniChat() {
                 <div className="font-serif text-lg leading-tight">Sheintel's Soirée Lounge</div>
                 <div className="text-[10px] tracking-[0.3em] uppercase text-primary/80 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  {online} guests online
+                  Live guest chat
                 </div>
               </div>
             </div>
             <span className="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-primary/70">Live</span>
           </div>
 
-          <div className="h-[380px] overflow-y-auto px-5 py-6 space-y-4 bg-background/40">
-            {msgs.map(m => (
-              <div key={m.id} className={`flex ${m.self ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[75%] rounded-2xl px-4 py-3 border ${
-                  m.self
-                    ? "bg-primary text-primary-foreground border-primary rounded-br-sm"
-                    : "bg-card text-foreground border-border rounded-bl-sm"
-                }`}>
-                  <div className={`text-[10px] tracking-[0.25em] uppercase mb-1 ${m.self ? "text-primary-foreground/70" : "text-primary/80"}`}>
-                    {m.user} · {m.time}
-                  </div>
-                  <div className="text-sm leading-relaxed">{m.text}</div>
-                </div>
+          <div ref={scrollRef} className="h-[380px] overflow-y-auto px-5 py-6 space-y-4 bg-background/40">
+            {msgs.length === 0 && (
+              <div className="text-center text-foreground/60 text-sm py-8">
+                Say something lovely — you'll be the first message in the lounge.
               </div>
-            ))}
+            )}
+            {msgs.map((m) => {
+              const self = selfIds.has(m.id);
+              return (
+                <div key={m.id} className={`flex ${self ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[75%] rounded-2xl px-4 py-3 border ${
+                    self
+                      ? "bg-primary text-primary-foreground border-primary rounded-br-sm"
+                      : "bg-card text-foreground border-border rounded-bl-sm"
+                  }`}>
+                    <div className={`text-[10px] tracking-[0.25em] uppercase mb-1 ${self ? "text-primary-foreground/70" : "text-primary/80"}`}>
+                      {m.user_name} · {formatChatTime(m.created_at)}
+                    </div>
+                    <div className="text-sm leading-relaxed">{m.text}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <form onSubmit={send} className="border-t border-border p-4 bg-card/60 backdrop-blur-md">
@@ -657,10 +758,11 @@ function MiniChat() {
               />
               <button
                 type="submit"
-                className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2"
+                disabled={sending || !text.trim()}
+                className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Send className="w-4 h-4" strokeWidth={1.5} />
-                Send
+                {sending ? "Sending…" : "Send"}
               </button>
             </div>
             <p className="text-[10px] tracking-[0.3em] uppercase text-foreground/50 mt-3 text-center inline-flex items-center gap-2 justify-center w-full">
