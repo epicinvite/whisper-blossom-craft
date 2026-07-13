@@ -1,0 +1,21 @@
+{
+  "name": "sheintel-18th-debut-rsvp",
+  "version": "1.0.0",
+  "description": "RSVP Web App and Celebrant Console for Sheintel's 18th Birthday Debut",
+  "main": "index.html",
+  "scripts": {
+    "dev": "http-server -p 8080",
+    "start": "http-server -p 8080"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  },
+  "keywords": [
+    "rsvp",
+    "debut",
+    "birthday",
+    "midnight-blue"
+  ],
+  "author": "Antigravity AI",
+  "license": "ISC"
+}
