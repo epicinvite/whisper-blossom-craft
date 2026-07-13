@@ -1,0 +1,8 @@
+{
+  "name": "sheintel-rsvp",
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/rsvp", "destination": "/rsv.html" }
+  ]
+}
