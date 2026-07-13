@@ -87,13 +87,19 @@ const galleryImgs = [
   gallery12.url,
 ];
 
-const wishes = [
-  { icon: Flower2, name: "Maria Santos", msg: "Happy 18th, Sheintel! Wishing you a lifetime of joy, adventure, and love. You deserve every beautiful thing this world has to offer!", date: "June 30, 2026" },
-  { icon: Sparkles, name: "Ana Reyes", msg: "You have blossomed into the most incredible young woman. May your 18th year be the most magical chapter yet!", date: "July 2, 2026" },
-  { icon: Star, name: "Carlo Dela Cruz", msg: "Happy 18th! May your dreams soar like butterflies, free and beautiful. So proud of the person you have become!", date: "July 4, 2026" },
-];
+const wishIconMap = { Heart, Sparkles, Star, Flower2, Gem, PartyPopper, Feather, Send } as const;
+type WishIconName = keyof typeof wishIconMap;
+const wishIconPalette: WishIconName[] = ["Heart", "Sparkles", "Star", "Flower2", "Gem", "PartyPopper", "Feather", "Send"];
 
-const wishIconPalette = [Heart, Sparkles, Star, Flower2, Gem, PartyPopper, Feather, Send];
+type WishRow = { id: string; name: string; message: string; icon: string; created_at: string };
+type ChatRow = { id: string; user_name: string; text: string; created_at: string };
+
+function formatWishDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+}
+function formatChatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
 
 function useCountdown() {
   const [now, setNow] = useState<number>(() => Date.now());
