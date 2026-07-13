@@ -32,6 +32,7 @@ import celebrantAsset from "@/assets/celebrant.jpg.asset.json";
 import dressMale from "@/assets/dress-male.png.asset.json";
 import dressFemale from "@/assets/dress-female.png.asset.json";
 import GoldConfetti from "@/components/GoldConfetti";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   component: Index,
