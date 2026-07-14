@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   Sparkles,
   CalendarDays,
@@ -32,6 +32,7 @@ import celebrantAsset from "@/assets/celebrant.jpg.asset.json";
 import dressMale from "@/assets/dress-male.png.asset.json";
 import dressFemale from "@/assets/dress-female.png.asset.json";
 import GoldConfetti from "@/components/GoldConfetti";
+import { getSheetConfig, submitRsvpToSheet, type RsvpAttendance } from "@/lib/rsvp-sheet";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -127,7 +128,7 @@ function Divider() {
   );
 }
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+function Eyebrow({ children }: { children: ReactNode }) {
   return (
     <p className="text-primary/80 tracking-[0.35em] uppercase text-xs mb-3 inline-flex items-center gap-2 justify-center">
       <Sparkles className="w-3 h-3" strokeWidth={1.5} />
@@ -156,10 +157,13 @@ function Nav() {
   ];
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/30 border-b border-border/40">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-center md:justify-end gap-6 text-xs tracking-[0.3em] uppercase">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-center md:justify-end gap-6 text-xs tracking-[0.3em] uppercase">
         {items.map(([l, h]) => (
           <a key={h} href={h} className="text-foreground/70 hover:text-primary transition-colors">{l}</a>
         ))}
+        <a href="/dashboard" className="text-primary hover:brightness-125 transition-colors inline-flex items-center gap-2">
+          <span>Dashboard</span>
+        </a>
       </div>
     </nav>
   );
@@ -415,58 +419,144 @@ function Ceremonies() {
 }
 
 function Rsvp() {
-  const [status, setStatus] = useState<null | "sent">(null);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [guests, setGuests] = useState("1");
+  const [attendance, setAttendance] = useState<RsvpAttendance>("attending");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [notice, setNotice] = useState("Your RSVP will be written to the Google Sheet once the Apps Script URL is set in the dashboard.");
+
+  const resetForm = () => {
+    setName("");
+    setPhone("");
+    setGuests("1");
+    setAttendance("attending");
+    setMessage("");
+  };
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!name.trim() || !phone.trim()) {
+      setStatus("error");
+      setNotice("Please add your name and contact number.");
+      return;
+    }
+
+    const config = getSheetConfig();
+    if (!config.scriptUrl.trim()) {
+      setStatus("error");
+      setNotice("Open /dashboard and paste your Apps Script Web App URL first, then RSVP will write into the Google Sheet.");
+      return;
+    }
+
+    setStatus("sending");
+    setNotice("Sending your RSVP to the Google Sheet...");
+
+    try {
+      await submitRsvpToSheet({
+        name: name.trim(),
+        phone: phone.trim(),
+        guests: attendance === "attending" ? guests : "0",
+        message: message.trim(),
+        attendance,
+      });
+      setStatus("sent");
+      setNotice("Your RSVP was sent to the Google Sheet.");
+      resetForm();
+    } catch (error) {
+      console.error(error);
+      setStatus("error");
+      setNotice("The sheet write failed. Check the Apps Script URL and redeploy the web app.");
+    }
+  };
+
   return (
     <section id="rsvp" className="py-24 px-6">
       <div className="max-w-3xl mx-auto">
         <SectionHeading eyebrow="Reserve Your Seat" title="RSVP" />
         <form
-          onSubmit={(e) => { e.preventDefault(); setStatus("sent"); }}
+          onSubmit={submit}
           className="rounded-2xl border border-border bg-card backdrop-blur-md p-8 md:p-10 space-y-5"
         >
           <div className="grid md:grid-cols-2 gap-5">
             <label className="block">
               <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Full Name *</span>
-              <input required className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
+              <input
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary"
+                placeholder="Your full name"
+              />
             </label>
             <label className="block">
               <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Contact Number *</span>
-              <input required className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
+              <input
+                required
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary"
+                placeholder="Mobile or phone number"
+              />
             </label>
           </div>
-          <label className="block">
-            <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Email Address</span>
-            <input type="email" className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
-          </label>
           <div className="grid md:grid-cols-2 gap-5">
             <label className="block">
-              <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Number of Guests</span>
-              <select className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary">
-                {[1,2,3,4,5].map(n => <option key={n}>{n} Guest{n>1?"s":""}</option>)}
+              <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Number of Seats</span>
+              <select
+                value={guests}
+                onChange={(event) => setGuests(event.target.value)}
+                className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary"
+              >
+                {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n} Seat{n>1?"s":""}</option>)}
               </select>
             </label>
             <label className="block">
               <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Attendance *</span>
-              <select required className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary">
-                <option>Yes, I'll be there</option>
-                <option>Unable to attend</option>
+              <select
+                required
+                value={attendance}
+                onChange={(event) => setAttendance(event.target.value as RsvpAttendance)}
+                className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary"
+              >
+                <option value="attending">Yes, I’ll be there</option>
+                <option value="declined">Unable to attend</option>
               </select>
             </label>
           </div>
           <label className="block">
             <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Message to Celebrant</span>
-            <textarea rows={4} className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary" />
+            <textarea
+              rows={4}
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              className="mt-2 w-full rounded-lg bg-input border border-border px-4 py-3 outline-none focus:border-primary"
+              placeholder="Share a message for Sheintel"
+            />
           </label>
-          <button className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2">
+          <p className="text-xs text-foreground/60 leading-relaxed">
+            Dashboard: <a href="/dashboard" className="text-primary hover:underline">/dashboard</a> · The sheet must have an Apps Script Web App URL saved there before submissions will appear in Google Sheets.
+          </p>
+          <button className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2 disabled:opacity-70" disabled={status === "sending"}>
             {status === "sent" ? (
               <>
                 <Check className="w-4 h-4" strokeWidth={2} />
                 Thank You — See You There!
               </>
+            ) : status === "sending" ? (
+              <>
+                <Sparkles className="w-4 h-4 animate-pulse" strokeWidth={2} />
+                Sending RSVP...
+              </>
             ) : (
               "Confirm Attendance"
             )}
           </button>
+          <p className={`text-sm ${status === "error" ? "text-destructive" : "text-foreground/70"}`}>
+            {notice}
+          </p>
         </form>
       </div>
     </section>
@@ -501,7 +591,7 @@ function Wishes() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !message.trim() || sending) return;
     setSending(true);
@@ -678,7 +768,7 @@ function MiniChat() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [msgs.length]);
 
-  const send = async (e: React.FormEvent) => {
+  const send = async (e: FormEvent) => {
     e.preventDefault();
     if (!text.trim() || sending) return;
     setSending(true);
