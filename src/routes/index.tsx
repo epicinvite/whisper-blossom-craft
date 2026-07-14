@@ -619,7 +619,7 @@ function Gift() {
             "Your presence is the greatest gift of all. However, if you wish to bless the celebrant with a monetary gift, you may conveniently do so using the QR code below."
           </p>
           <div className="mx-auto w-48 h-48 rounded-2xl bg-white border border-border grid place-items-center overflow-hidden mb-6">
-            <img src={qrClientEpic.url} alt="QR code for monetary gift" className="w-full h-full object-cover" />
+            <img src="/qr-michelle.jpg" alt="QR code for monetary gift" className="w-full h-full object-cover" />
           </div>
           <div className="flex flex-wrap justify-center gap-2 mb-6 text-xs tracking-[0.25em] uppercase text-primary/80">
             <span>GCash</span><span>·</span><span>Maya</span><span>·</span><span>Bank Transfer</span>
@@ -628,7 +628,7 @@ function Gift() {
           <div className="text-foreground/60 mb-6">+63 908 083 XXXX</div>
           <div className="flex flex-wrap justify-center gap-3">
             <a
-              href={qrClientEpic.url}
+              href="/qr-michelle.jpg"
               download="sheintel-monetary-gift-qr.jpg"
               className="px-6 py-2 rounded-full bg-primary text-primary-foreground text-xs tracking-[0.25em] uppercase hover:brightness-110 transition"
             >
