@@ -1620,6 +1620,28 @@
   <script>
     // ---------- CONSTANTS & DATA ----------
     const EVENT_DATE = new Date("2026-08-22T18:00:00+08:00");
+    const SHEET_ID = "1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI";
+    const DEFAULT_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+    const DEFAULT_CONSOLE_CONFIG = {
+      sheetId: SHEET_ID,
+      csvUrl: DEFAULT_SHEET_CSV_URL,
+      scriptUrl: "",
+    };
+
+    const ensureConsoleConfig = () => {
+      try {
+        const raw = localStorage.getItem("rsvp_celebrant_config");
+        const parsed = raw ? JSON.parse(raw) : {};
+        const merged = { ...DEFAULT_CONSOLE_CONFIG, ...parsed };
+        if (!raw) {
+          localStorage.setItem("rsvp_celebrant_config", JSON.stringify(merged));
+        }
+        return merged;
+      } catch (err) {
+        console.warn("Unable to load RSVP console config.", err);
+        return DEFAULT_CONSOLE_CONFIG;
+      }
+    };
 
     const perfumes = [
       "Lyka Santos", "Charlene Malavega", "Iriesh Ebrada", "Lena Tolentino",
@@ -1826,14 +1848,8 @@
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
 
         // Check for dynamic API settings URL
-        let scriptUrl = "";
-        const savedConfig = localStorage.getItem("rsvp_celebrant_config");
-        if (savedConfig) {
-          try {
-            const parsed = JSON.parse(savedConfig);
-            scriptUrl = parsed.scriptUrl || "";
-          } catch(err) {}
-        }
+        const savedConfig = ensureConsoleConfig();
+        const scriptUrl = savedConfig.scriptUrl || "";
 
         const payload = {
           name,
@@ -2002,6 +2018,7 @@
 
     // ---------- INIT PAGE ----------
     document.addEventListener("DOMContentLoaded", () => {
+      ensureConsoleConfig();
       initStars();
       initConfetti();
       initCountdown();

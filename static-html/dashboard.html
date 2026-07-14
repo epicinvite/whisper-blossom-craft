@@ -255,7 +255,7 @@
         <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input type="text" class="search-input" id="searchInput" placeholder="Search by name, phone…"></div>
         <div class="filter-row"><select class="filter-select" id="filterStatus"><option value="all">All Responses</option><option value="attending">Attending</option><option value="declined">Not Attending</option></select><select class="filter-select" id="sortBy"><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="name_az">Name A–Z</option><option value="name_za">Name Z–A</option><option value="seats_hi">Most Seats</option></select></div>
       </div>
-      <div class="glass-card" style="padding:0; overflow:hidden;"><div class="table-wrap"><table class="guest-table" id="guestTable"><thead><tr><th>#</th><th>Name</th><th>Seats</th><th>Phone</th><th>Message</th><th>Status</th><th>Actions</th></tr></thead><tbody id="guestTableBody"><tr><td colspan="7"><div class="loading-state"><div class="spinner"></div>Loading guest list…</div></td></tr></tbody></table></div><div style="padding:12px 20px; border-top:1px solid var(--border-gold); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><p style="font-size:.78rem; color:var(--text-muted);" id="tableCount">Showing 0 guests</p><p style="font-size:.78rem; color:var(--text-muted);">Data stored locally in your browser only.</p></div></div>
+      <div class="glass-card" style="padding:0; overflow:hidden;"><div class="table-wrap"><table class="guest-table" id="guestTable"><thead><tr><th>#</th><th>Name</th><th>Seats</th><th>Phone</th><th>Message</th><th>Status</th><th>Actions</th></tr></thead><tbody id="guestTableBody"><tr><td colspan="7"><div class="loading-state"><div class="spinner"></div>Loading guest list…</div></td></tr></tbody></table></div><div style="padding:12px 20px; border-top:1px solid var(--border-gold); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><p style="font-size:.78rem; color:var(--text-muted);" id="tableCount">Showing 0 guests</p><p style="font-size:.78rem; color:var(--text-muted);">Live rows are pulled from the Google Sheet.</p></div></div>
     </main>
   </div>
 
@@ -263,7 +263,7 @@
   <div class="modal-overlay" id="guestModal"><div class="modal-box"><div class="modal-header"><h2 id="guestModalTitle">Add Guest</h2><button class="modal-close" id="guestModalClose">&times;</button></div><div class="form-group"><label class="form-label" for="mgName">Full Name *</label><input type="text" id="mgName" class="form-input" placeholder="e.g. Juan dela Cruz"></div><div class="form-group"><label class="form-label" for="mgStatus">Attendance</label><select id="mgStatus" class="form-select"><option value="attending">✅ Attending</option><option value="declined">❌ Not Attending</option></select></div><div class="form-group" id="mgSeatGroup"><label class="form-label" for="mgGuests">Number of Seats</label><select id="mgGuests" class="form-select"><option value="1">1 Seat</option><option value="2">2 Seats</option><option value="3">3 Seats</option><option value="4">4 Seats</option><option value="5">5 Seats</option><option value="6">6 Seats</option><option value="7">7 Seats</option><option value="8">8 Seats</option><option value="9">9 Seats</option><option value="10">10 Seats</option></select></div><div class="form-group"><label class="form-label" for="mgPhone">Phone Number</label><input type="tel" id="mgPhone" class="form-input" placeholder="e.g. +63 917 123 4567"></div><div class="form-group"><label class="form-label" for="mgMessage">Birthday Message</label><textarea id="mgMessage" class="form-input" style="resize:vertical; min-height:90px;" placeholder="Guest's birthday wish for Sheintel…"></textarea></div><div style="display:flex; gap:12px; margin-top:8px;"><button class="btn btn-secondary" id="guestModalCancel" style="flex:1;">Cancel</button><button class="btn btn-primary" id="guestModalSave" style="flex:2;"><i class="fa-solid fa-floppy-disk"></i> Save Guest</button></div></div></div>
 
   <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal"><div class="modal-box"><div class="modal-header"><h2>⚙️ Console Settings</h2><button class="modal-close" id="settingsClose">&times;</button></div><p class="settings-section-title">Access</p><div class="form-group"><label class="form-label" for="sPin">Change Access PIN</label><input type="password" id="sPin" class="form-input" placeholder="New PIN (leave blank to keep)"></div><p class="settings-section-title">Event Configuration</p><div class="form-group"><label class="form-label" for="sRSVP">RSVP Name</label><input type="text" id="sRSVP" class="form-input" placeholder="e.g. Sheintel"></div><div class="form-group"><label class="form-label" for="sCapacity">Venue Capacity (seats)</label><input type="number" id="sCapacity" class="form-input" placeholder="150" min="1" max="9999"></div><div class="form-group"><label class="form-label" for="sDeadline">RSVP Deadline</label><input type="date" id="sDeadline" class="form-input"></div><p class="settings-section-title">Google Sheets Integration (optional)</p><div class="form-group"><label class="form-label" for="sScriptUrl">Apps Script Web App URL</label><input type="url" id="sScriptUrl" class="form-input" placeholder="https://script.google.com/macros/s/…"></div><p style="font-size:.75rem; color:var(--text-muted); margin-top:-14px; margin-bottom:20px; line-height:1.6;">Paste your deployed Google Apps Script URL here to sync RSVP submissions to a Google Sheet automatically.</p><div style="display:flex; gap:12px; margin-top:8px;"><button class="btn btn-secondary" id="settingsCancel" style="flex:1;">Cancel</button><button class="btn btn-primary" id="settingsSave" style="flex:2;"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button></div></div></div>
+  <div class="modal-overlay" id="settingsModal"><div class="modal-box"><div class="modal-header"><h2>⚙️ Console Settings</h2><button class="modal-close" id="settingsClose">&times;</button></div><p class="settings-section-title">Access</p><div class="form-group"><label class="form-label" for="sPin">Change Access PIN</label><input type="password" id="sPin" class="form-input" placeholder="New PIN (leave blank to keep)"></div><p class="settings-section-title">Event Configuration</p><div class="form-group"><label class="form-label" for="sRSVP">RSVP Name</label><input type="text" id="sRSVP" class="form-input" placeholder="e.g. Sheintel"></div><div class="form-group"><label class="form-label" for="sCapacity">Venue Capacity (seats)</label><input type="number" id="sCapacity" class="form-input" placeholder="150" min="1" max="9999"></div><div class="form-group"><label class="form-label" for="sDeadline">RSVP Deadline</label><input type="date" id="sDeadline" class="form-input"></div><p class="settings-section-title">Google Sheets Integration (optional)</p><div class="form-group"><label class="form-label" for="sScriptUrl">Apps Script Web App URL</label><input type="url" id="sScriptUrl" class="form-input" placeholder="https://script.google.com/macros/s/…"></div><p style="font-size:.75rem; color:var(--text-muted); margin-top:-14px; margin-bottom:20px; line-height:1.6;">The dashboard reads live rows from your spreadsheet by default. Paste the deployed Apps Script URL here to enable write updates from the form and dashboard controls.</p><div style="display:flex; gap:12px; margin-top:8px;"><button class="btn btn-secondary" id="settingsCancel" style="flex:1;">Cancel</button><button class="btn btn-primary" id="settingsSave" style="flex:2;"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button></div></div></div>
 
   <!-- Confirm Dialog -->
   <div id="confirmDialog"><div class="confirm-box"><i class="fa-solid fa-triangle-exclamation"></i><h3 id="confirmTitle">Are you sure?</h3><p id="confirmMsg">This action cannot be undone.</p><div class="confirm-actions"><button class="btn btn-secondary" id="confirmCancel">Cancel</button><button class="btn btn-danger" id="confirmOk">Delete</button></div></div></div>
@@ -274,31 +274,171 @@
   <script>
     const LS_RSVP = 'rsvp_submissions';
     const LS_CONFIG = 'rsvp_celebrant_config';
+    const SHEET_ID = '1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI';
+    const DEFAULT_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+    const DEFAULT_CONFIG = {
+      name: 'Sheintel',
+      username: 'sheintel',
+      password: '082226',
+      capacity: 150,
+      deadline: '',
+      csvUrl: DEFAULT_SHEET_CSV_URL,
+      scriptUrl: '',
+      sheetId: SHEET_ID,
+    };
     const DEFAULT_USER = 'sheintel';
     const DEFAULT_PASS = '082226';
     const CIRCUMFERENCE = 2 * Math.PI * 48;
     const ls_get = (k,def)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def};};
     const ls_set = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{};};
     const escHtml = s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    const parseCSV = (text) => {
+      const rows = [];
+      let row = [];
+      let entry = '';
+      let insideQuote = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+          if (insideQuote && nextChar === '"') {
+            entry += '"';
+            i++;
+          } else {
+            insideQuote = !insideQuote;
+          }
+          continue;
+        }
+
+        if (char === ',' && !insideQuote) {
+          row.push(entry);
+          entry = '';
+          continue;
+        }
+
+        if ((char === '\r' || char === '\n') && !insideQuote) {
+          if (char === '\r' && nextChar === '\n') {
+            i++;
+          }
+          row.push(entry);
+          if (row.length > 1 || row[0] !== '') {
+            rows.push(row);
+          }
+          row = [];
+          entry = '';
+          continue;
+        }
+
+        entry += char;
+      }
+
+      if (entry || row.length) {
+        row.push(entry);
+        rows.push(row);
+      }
+
+      return rows;
+    };
     const showToast=(msg,type='success')=>{const toast=document.getElementById('toast'),icon=document.getElementById('toastIcon'),txt=document.getElementById('toastMsg');txt.textContent=msg;icon.className=type==='success'?'fa-solid fa-circle-check':type==='error'?'fa-solid fa-circle-xmark':'fa-solid fa-triangle-exclamation';toast.className='toast show '+type;clearTimeout(toast._t);toast._t=setTimeout(()=>toast.className='toast',4000);};
     const showConfirm=(title,msg,ok)=>{document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;const dlg=document.getElementById('confirmDialog');dlg.classList.add('show');const okBtn=document.getElementById('confirmOk'),cancelBtn=document.getElementById('confirmCancel');const close=()=>dlg.classList.remove('show');okBtn.onclick=()=>{close();ok();};cancelBtn.onclick=close;};
     const migrateGuests=()=>{let g=ls_get(LS_RSVP,[]),changed=false;g.forEach(x=>{if(!x.id){x.id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);changed=true;}if(!x.addedAt){x.addedAt=new Date().toISOString();changed=true;}if(x.canAttend==='Yes'){x.status='attending';changed=true;}else if(x.cantAttend==='Yes'){x.status='declined';changed=true;}else if(!x.status){x.status='attending';changed=true;}if(x.guests===undefined){x.guests=x.guestCount||1;changed=true;}});if(changed)ls_set(LS_RSVP,g);};
-    const getConfig=()=>ls_get(LS_CONFIG,{});
+    const getConfig=()=>{const stored=ls_get(LS_CONFIG,null); const cfg={...DEFAULT_CONFIG,...(stored||{})}; if(!stored) ls_set(LS_CONFIG,cfg); return cfg;};
+    const saveConfig=(cfg)=>ls_set(LS_CONFIG,{...DEFAULT_CONFIG,...cfg});
     const getGuests=()=>ls_get(LS_RSVP,[]);
     const saveGuests=a=>ls_set(LS_RSVP,a);
+    const normalizeRemoteGuest = (guest, rowNumber) => {
+      const guestsValue = guest.guests ?? guest.seats ?? '0';
+      const canAttend = guest.canAttend === 'Yes' || guest.status === 'attending';
+      const cantAttend = guest.cantAttend === 'Yes' || guest.status === 'declined';
+      const safeRowNumber = Number(guest.rowNumber || rowNumber || 0) || rowNumber || undefined;
+
+      return {
+        id: guest.id || (safeRowNumber ? `row-${safeRowNumber}` : `guest-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`),
+        rowNumber: safeRowNumber,
+        addedAt: guest.addedAt || '',
+        name: guest.name || '',
+        guests: String(guestsValue),
+        phone: guest.phone || '',
+        message: guest.message || '',
+        canAttend: canAttend ? 'Yes' : '',
+        cantAttend: cantAttend ? 'Yes' : '',
+        status: canAttend ? 'attending' : cantAttend ? 'declined' : (guest.status || 'attending'),
+      };
+    };
+    const loadRemoteGuests = async () => {
+      const cfg = getConfig();
+      const sheetUrl = (cfg.csvUrl || DEFAULT_SHEET_CSV_URL).trim();
+
+      try {
+        const response = await fetch(sheetUrl, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const csvText = await response.text();
+        const rows = parseCSV(csvText);
+        if (rows.length <= 1) return [];
+
+        return rows.slice(1)
+          .map((row, index) => normalizeRemoteGuest({
+            rowNumber: index + 2,
+            name: row[0] || '',
+            guests: row[1] || '0',
+            phone: row[2] || '',
+            message: row[3] || '',
+            canAttend: row[4] || '',
+            cantAttend: row[5] || '',
+          }, index + 2))
+          .filter((guest) => guest.name.trim() !== '');
+      } catch (err) {
+        console.warn('Unable to load live sheet data.', err);
+        return null;
+      }
+    };
+    const hydrateGuests = async () => {
+      const remote = await loadRemoteGuests();
+      if (remote !== null) {
+        saveGuests(remote);
+        return remote;
+      }
+      return getGuests();
+    };
+    const syncSheetWrite = async (action, payload = {}) => {
+      const cfg = getConfig();
+      const scriptUrl = (cfg.scriptUrl || '').trim();
+      if (!scriptUrl) return false;
+
+      try {
+        const body = new FormData();
+        body.append('action', action);
+        Object.entries(payload).forEach(([key, value]) => {
+          body.append(key, value ?? '');
+        });
+
+        await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          body,
+        });
+        return true;
+      } catch (err) {
+        console.warn(`Sheet sync failed for ${action}.`, err);
+        return false;
+      }
+    };
     const addGuest=guest=>{let arr=getGuests();arr.push({...guest,id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),addedAt:new Date().toISOString()});saveGuests(arr);};
     const updateGuest=(id,patch)=>{saveGuests(getGuests().map(g=>g.id===id?{...g,...patch}:g));};
     const deleteGuest=id=>{saveGuests(getGuests().filter(g=>g.id!==id));};
     // ---------- Login ----------
     const loginScreen=document.getElementById('loginScreen'), dashboardScreen=document.getElementById('dashboardScreen');
-    const login=()=>{
+    const login=async()=>{
       const user=document.getElementById('loginUser').value.trim();
       const pass=document.getElementById('loginPass').value;
       const cfg=getConfig();
       const correctUser=cfg.username||DEFAULT_USER;
       const correctPass=cfg.password||DEFAULT_PASS;
       if(user===correctUser && pass===correctPass){
-        loginScreen.style.display='none'; dashboardScreen.classList.add('active'); renderDashboard();
+        loginScreen.style.display='none'; dashboardScreen.classList.add('active'); await renderDashboard(true);
       } else {
         document.getElementById('loginError').style.display='block';
         setTimeout(()=>document.getElementById('loginError').style.display='none',3000);
@@ -316,16 +456,16 @@
     const renderTable=()=>{let guests=getGuests(); if(curFilter==='attending') guests=guests.filter(g=>g.status==='attending'); else if(curFilter==='declined') guests=guests.filter(g=>g.status==='declined'); if(curSearch.trim()){const q=curSearch.toLowerCase(); guests=guests.filter(g=> (g.name||'').toLowerCase().includes(q) || (g.phone||'').toLowerCase().includes(q) || (g.message||'').toLowerCase().includes(q));}
       if(curSort==='newest') guests=[...guests].reverse(); else if(curSort==='oldest') {} else if(curSort==='name_az') guests=[...guests].sort((a,b)=>(a.name||'').localeCompare(b.name||'')); else if(curSort==='name_za') guests=[...guests].sort((a,b)=>(b.name||'').localeCompare(a.name||'')); else if(curSort==='seats_hi') guests=[...guests].sort((a,b)=>(parseInt(b.guests)||1)-(parseInt(a.guests)||1));
       const tbody=document.getElementById('guestTableBody'); document.getElementById('tableCount').textContent=`Showing ${guests.length} guest${guests.length!==1?'s':''}`; if(guests.length===0){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-inbox"></i> No guests found. Add one manually or share the invitation link!</div></td></tr>`; return;}
-      tbody.innerHTML=''; guests.forEach((g,i)=>{const seats=parseInt(g.guests)||1; const status=g.status; const pillCls=status==='attending'?'pill-attending':status==='declined'?'pill-declined':'pill-pending'; const msgSnip=(g.message||'—').length>40?(g.message||'—').slice(0,40)+'…':(g.message||'—'); const tr=document.createElement('tr'); tr.style.animationDelay=`${i*30}ms`; tr.innerHTML=`<td style="color:var(--text-muted); font-size:.8rem;">${i+1}</td><td><strong>${escHtml(g.name||'—')}</strong></td><td>${status==='attending'?`<span style="font-family:var(--font-serif); font-size:1.2rem; color:var(--gold-light);">${seats}</span>`:`<span style="color:var(--text-muted);">—</span>`}</td><td style="color:var(--text-muted); font-size:.85rem;">${escHtml(g.phone||'—')}</td><td style="color:var(--text-muted); font-size:.82rem;" title="${escHtml(g.message||'')}">${escHtml(msgSnip)}</td><td><select class="status-select" data-id="${g.id}" onchange="changeStatus(this)"><option value="attending" ${status==='attending'?'selected':''}>✅ Attending</option><option value="declined" ${status==='declined'?'selected':''}>❌ Declined</option></select></td><td><button class="tbl-action-btn" title="Edit" onclick="openEditModal('${g.id}')"><i class="fa-solid fa-pen-to-square"></i></button><button class="tbl-action-btn" title="Delete" onclick="confirmDelete('${g.id}','${escHtml(g.name||'')}')"><i class="fa-solid fa-trash-can"></i></button></td>`; tbody.appendChild(tr);}); };
-    const changeStatus=sel=>{const id=sel.dataset.id, val=sel.value; updateGuest(id,{status:val, canAttend: val==='attending'?'Yes':'', cantAttend: val==='declined'?'Yes':''}); renderDashboard(); showToast('Status updated!');};
-    const confirmDelete=(id,name)=>{showConfirm('Delete Guest?',`Remove "${name}" from the guest list? This cannot be undone.`,()=>{deleteGuest(id); renderDashboard(); showToast('Guest removed.', 'warn');});};
+      tbody.innerHTML=''; guests.forEach((g,i)=>{const seats=parseInt(g.guests)||1; const status=g.status; const pillCls=status==='attending'?'pill-attending':status==='declined'?'pill-declined':'pill-pending'; const msgSnip=(g.message||'—').length>40?(g.message||'—').slice(0,40)+'…':(g.message||'—'); const tr=document.createElement('tr'); tr.style.animationDelay=`${i*30}ms`; tr.innerHTML=`<td style="color:var(--text-muted); font-size:.8rem;">${i+1}</td><td><strong>${escHtml(g.name||'—')}</strong></td><td>${status==='attending'?`<span style="font-family:var(--font-serif); font-size:1.2rem; color:var(--gold-light);">${seats}</span>`:`<span style="color:var(--text-muted);">—</span>`}</td><td style="color:var(--text-muted); font-size:.85rem;">${escHtml(g.phone||'—')}</td><td style="color:var(--text-muted); font-size:.82rem;" title="${escHtml(g.message||'')}">${escHtml(msgSnip)}</td><td><select class="status-select" data-id="${g.id}" data-row-number="${g.rowNumber || ''}" onchange="changeStatus(this)"><option value="attending" ${status==='attending'?'selected':''}>✅ Attending</option><option value="declined" ${status==='declined'?'selected':''}>❌ Declined</option></select></td><td><button class="tbl-action-btn" title="Edit" onclick="openEditModal('${g.id}')"><i class="fa-solid fa-pen-to-square"></i></button><button class="tbl-action-btn" title="Delete" onclick="confirmDelete('${g.id}','${escHtml(g.name||'')}')"><i class="fa-solid fa-trash-can"></i></button></td>`; tbody.appendChild(tr);}); };
+    const changeStatus=sel=>{const id=sel.dataset.id, val=sel.value; const rowNumber=sel.dataset.rowNumber; const guest=getGuests().find(g=>g.id===id); updateGuest(id,{status:val, canAttend: val==='attending'?'Yes':'', cantAttend: val==='declined'?'Yes':''}); if(rowNumber && guest){void syncSheetWrite('updateGuest',{rowNumber,name:guest.name||'',guests:val==='attending'?(parseInt(guest.guests)||1):0,phone:guest.phone||'',message:guest.message||'',canAttend:val==='attending'?'Yes':'',cantAttend:val==='declined'?'Yes':''});} renderDashboard(); showToast('Status updated!');};
+    const confirmDelete=(id,name)=>{showConfirm('Delete Guest?',`Remove "${name}" from the guest list? This cannot be undone.`,()=>{const guest=getGuests().find(g=>g.id===id); if(guest?.rowNumber){void syncSheetWrite('deleteGuest',{rowNumber:guest.rowNumber});} deleteGuest(id); renderDashboard(); showToast('Guest removed.', 'warn');});};
     // ---------- Guest Modal ----------
     let editingId=null;
     const openAddModal=()=>{editingId=null;document.getElementById('guestModalTitle').textContent='Add Guest';document.getElementById('mgName').value='';document.getElementById('mgStatus').value='attending';document.getElementById('mgGuests').value='1';document.getElementById('mgPhone').value='';document.getElementById('mgMessage').value='';document.getElementById('mgSeatGroup').style.display='';document.getElementById('guestModal').classList.add('show');document.getElementById('mgName').focus();};
     const openEditModal=id=>{const g=getGuests().find(x=>x.id===id); if(!g) return; editingId=id; document.getElementById('guestModalTitle').textContent='Edit Guest'; document.getElementById('mgName').value=g.name||''; document.getElementById('mgStatus').value=g.status||'attending'; document.getElementById('mgGuests').value=String(parseInt(g.guests)||1); document.getElementById('mgPhone').value=g.phone||''; document.getElementById('mgMessage').value=g.message||''; document.getElementById('mgSeatGroup').style.display=g.status==='declined'?'none':''; document.getElementById('guestModal').classList.add('show'); document.getElementById('mgName').focus(); };
     const closeGuestModal=()=>{document.getElementById('guestModal').classList.remove('show'); editingId=null;};
     document.getElementById('mgStatus').addEventListener('change',function(){document.getElementById('mgSeatGroup').style.display=this.value==='declined'?'none':'';});
-    document.getElementById('guestModalSave').addEventListener('click',()=>{const name=document.getElementById('mgName').value.trim(); const status=document.getElementById('mgStatus').value; const guests=document.getElementById('mgGuests').value; const phone=document.getElementById('mgPhone').value.trim(); const message=document.getElementById('mgMessage').value.trim(); if(!name){showToast('Please enter a name.', 'error'); return;} const payload={name,status,guests:status==='declined'?'0':guests,phone,message,canAttend:status==='attending'?'Yes':'',cantAttend:status==='declined'?'Yes':''}; if(editingId){updateGuest(editingId,payload); showToast('Guest updated!');} else {addGuest(payload); showToast('Guest added!');} closeGuestModal(); renderDashboard();});
+    document.getElementById('guestModalSave').addEventListener('click',()=>{const name=document.getElementById('mgName').value.trim(); const status=document.getElementById('mgStatus').value; const guests=document.getElementById('mgGuests').value; const phone=document.getElementById('mgPhone').value.trim(); const message=document.getElementById('mgMessage').value.trim(); if(!name){showToast('Please enter a name.', 'error'); return;} const payload={name,status,guests:status==='declined'?'0':guests,phone,message,canAttend:status==='attending'?'Yes':'',cantAttend:status==='declined'?'Yes':''}; if(editingId){const existing=getGuests().find(x=>x.id===editingId); updateGuest(editingId,payload); if(existing?.rowNumber){void syncSheetWrite('updateGuest',{rowNumber:existing.rowNumber,...payload});} showToast('Guest updated!');} else {addGuest(payload); void syncSheetWrite('saveGuest',payload); showToast('Guest added!');} closeGuestModal(); renderDashboard();});
     document.getElementById('addGuestBtn').addEventListener('click',openAddModal);
     document.getElementById('guestModalClose').addEventListener('click',closeGuestModal);
     document.getElementById('guestModalCancel').addEventListener('click',closeGuestModal);
@@ -337,7 +477,7 @@
     document.getElementById('settingsClose').addEventListener('click',closeSettings);
     document.getElementById('settingsCancel').addEventListener('click',closeSettings);
     document.getElementById('settingsModal').addEventListener('click',e=>{if(e.target===e.currentTarget) closeSettings();});
-    document.getElementById('settingsSave').addEventListener('click',()=>{const cfg=getConfig(); const newUser=document.getElementById('sUsername').value.trim(); const newPass=document.getElementById('sPassword').value; const name=document.getElementById('sRSVP').value.trim(); const capacity=parseInt(document.getElementById('sCapacity').value)||150; const deadline=document.getElementById('sDeadline').value; const scriptUrl=document.getElementById('sScriptUrl').value.trim(); const upd={...cfg,name:name||'Sheintel',capacity,deadline,scriptUrl}; if(newUser) upd.username=newUser; if(newPass) upd.password=newPass; ls_set(LS_CONFIG,upd); closeSettings(); renderDashboard(); showToast('Settings saved!');});
+    document.getElementById('settingsSave').addEventListener('click',()=>{const cfg=getConfig(); const newUser=document.getElementById('sUsername').value.trim(); const newPass=document.getElementById('sPassword').value; const name=document.getElementById('sRSVP').value.trim(); const capacity=parseInt(document.getElementById('sCapacity').value)||150; const deadline=document.getElementById('sDeadline').value; const scriptUrl=document.getElementById('sScriptUrl').value.trim(); const upd={...cfg,name:name||'Sheintel',capacity,deadline,scriptUrl,csvUrl:cfg.csvUrl||DEFAULT_SHEET_CSV_URL,sheetId:SHEET_ID}; if(newUser) upd.username=newUser; if(newPass) upd.password=newPass; saveConfig(upd); closeSettings(); renderDashboard(); showToast('Settings saved!');});
     // ---------- Search & Filter ----------
     document.getElementById('searchInput').addEventListener('input',e=>{curSearch=e.target.value; renderTable();});
     document.getElementById('filterStatus').addEventListener('change',e=>{curFilter=e.target.value; renderTable();});
@@ -345,11 +485,11 @@
     // ---------- Export ----------
     document.getElementById('exportBtn').addEventListener('click',()=>{const guests=getGuests(); if(guests.length===0){showToast('No data to export.', 'warn'); return;} const headers=['#','Name','Status','Seats','Phone','Message','Added']; const rows=guests.map((g,i)=>[i+1,`"${(g.name||'').replace(/"/g,'""')}"`,g.status==='attending'?'Attending':'Declined',g.status==='attending'?parseInt(g.guests)||1:0,`"${(g.phone||'').replace(/"/g,'""')}"`,`"${(g.message||'').replace(/"/g,'""')}"`,g.addedAt?new Date(g.addedAt).toLocaleString():'']); const csv=[headers,...rows].map(r=>r.join(',')).join('\r\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`sheintel18_rsvp_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); showToast('CSV exported!');});
     // ---------- Clear All ----------
-    document.getElementById('clearAllBtn').addEventListener('click',()=>{const guests=getGuests(); if(guests.length===0){showToast('No data to clear.', 'warn'); return;} showConfirm('Clear All Guests?',`This will permanently delete all ${guests.length} entries. This cannot be undone.`,()=>{saveGuests([]); renderDashboard(); showToast('All guests cleared.', 'warn');});});
+    document.getElementById('clearAllBtn').addEventListener('click',()=>{const guests=getGuests(); if(guests.length===0){showToast('No data to clear.', 'warn'); return;} showConfirm('Clear All Guests?',`This will permanently delete all ${guests.length} entries. This cannot be undone.`,()=>{void syncSheetWrite('clearAll',{}); saveGuests([]); renderDashboard(); showToast('All guests cleared.', 'warn');});});
     // ---------- Refresh ----------
-    document.getElementById('refreshBtn').addEventListener('click',()=>{renderDashboard(); showToast('Dashboard refreshed!');});
+    document.getElementById('refreshBtn').addEventListener('click',async()=>{await renderDashboard(true); showToast('Dashboard refreshed!');});
     // ---------- Main Render ----------
-    const renderDashboard=()=>{migrateGuests(); const guests=getGuests(); renderStats(guests); renderTable();};
+    const renderDashboard=async(refreshRemote=false)=>{if(refreshRemote){await hydrateGuests();} migrateGuests(); const guests=getGuests(); renderStats(guests); renderTable();};
     // ---------- Global Key ----------
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGuestModal(); closeSettings(); document.getElementById('confirmDialog').classList.remove('show');}});
     // Uncomment next line for dev auto-login
