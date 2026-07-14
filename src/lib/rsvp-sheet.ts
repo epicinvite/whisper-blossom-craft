@@ -9,7 +9,8 @@ export type RsvpSheetConfig = {
   sheetId: string;
   csvUrl: string;
   scriptUrl: string;
-  dashboardPin: string;
+  dashboardUsername: string;
+  dashboardPassword: string;
 };
 
 export type RsvpFormSubmission = {
@@ -35,7 +36,8 @@ const DEFAULT_CONFIG: RsvpSheetConfig = {
   sheetId: RSVP_SHEET_ID,
   csvUrl: RSVP_SHEET_CSV_URL,
   scriptUrl: "",
-  dashboardPin: "082226",
+  dashboardUsername: "sheintel",
+  dashboardPassword: "082226",
 };
 
 function isBrowser() {

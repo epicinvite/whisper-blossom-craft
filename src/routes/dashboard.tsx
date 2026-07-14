@@ -44,7 +44,8 @@ function toastClass(tone: ToastTone) {
 
 function DashboardPage() {
   const [config, setConfig] = useState(() => getSheetConfig());
-  const [loginPin, setLoginPin] = useState("");
+  const [loginUser, setLoginUser] = useState("");
+  const [loginPass, setLoginPass] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [rows, setRows] = useState<RsvpSheetRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,7 +55,7 @@ function DashboardPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setUnlocked(window.sessionStorage.getItem("rsvp_dashboard_unlocked") === "true");
+    setUnlocked(window.sessionStorage.getItem("rsvp_console_unlocked") === "true");
   }, []);
 
   const pushMessage = (text: string, tone: ToastTone = "success") => {
@@ -91,13 +92,16 @@ function DashboardPage() {
 
   const submitLogin = (event: FormEvent) => {
     event.preventDefault();
-    if (loginPin.trim() === (config.dashboardPin || "082226")) {
-      sessionStorage.setItem("rsvp_dashboard_unlocked", "true");
+    const correctUser = (config.dashboardUsername || "sheintel").trim().toLowerCase();
+    const correctPass = config.dashboardPassword || "082226";
+
+    if (loginUser.trim().toLowerCase() === correctUser && loginPass === correctPass) {
+      sessionStorage.setItem("rsvp_console_unlocked", "true");
       setUnlocked(true);
       pushMessage("Dashboard unlocked.", "success");
       return;
     }
-    pushMessage("Incorrect dashboard PIN.", "error");
+    pushMessage("Incorrect username or password.", "error");
   };
 
   const saveSettings = async () => {
@@ -107,7 +111,8 @@ function DashboardPage() {
         sheetId: RSVP_SHEET_ID,
         csvUrl: sheetSource.trim() || config.csvUrl || "",
         scriptUrl: config.scriptUrl.trim(),
-        dashboardPin: config.dashboardPin.trim() || "082226",
+        dashboardUsername: config.dashboardUsername.trim() || "sheintel",
+        dashboardPassword: config.dashboardPassword || "082226",
       });
       setConfig(next);
       setSheetSource(next.csvUrl);
@@ -165,18 +170,29 @@ function DashboardPage() {
           </p>
           <form onSubmit={submitLogin} className="space-y-4">
             <label className="block">
-              <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Dashboard PIN</span>
+              <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Username</span>
               <input
-                value={loginPin}
-                onChange={(event) => setLoginPin(event.target.value)}
+                value={loginUser}
+                onChange={(event) => setLoginUser(event.target.value)}
+                className="mt-2 w-full rounded-xl bg-input border border-border px-4 py-3 outline-none focus:border-primary"
+                placeholder="Enter username"
+                autoComplete="username"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Password</span>
+              <input
+                value={loginPass}
+                onChange={(event) => setLoginPass(event.target.value)}
                 type="password"
                 className="mt-2 w-full rounded-xl bg-input border border-border px-4 py-3 outline-none focus:border-primary"
-                placeholder="Enter PIN"
+                placeholder="Enter password"
+                autoComplete="current-password"
               />
             </label>
             <button className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2">
               <Shield className="w-4 h-4" strokeWidth={1.5} />
-              Enter Dashboard
+              Sign In
             </button>
           </form>
           <div className="mt-6 flex items-center justify-between text-xs text-foreground/55">
@@ -356,10 +372,19 @@ function DashboardPage() {
                   />
                 </label>
                 <label className="block">
-                  <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Dashboard PIN</span>
+                  <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Username</span>
                   <input
-                    value={config.dashboardPin}
-                    onChange={(event) => setConfig((current) => ({ ...current, dashboardPin: event.target.value }))}
+                    value={config.dashboardUsername}
+                    onChange={(event) => setConfig((current) => ({ ...current, dashboardUsername: event.target.value }))}
+                    className="mt-2 w-full rounded-xl bg-input border border-border px-4 py-3 outline-none focus:border-primary text-sm"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs tracking-[0.25em] uppercase text-primary/80">Password</span>
+                  <input
+                    value={config.dashboardPassword}
+                    onChange={(event) => setConfig((current) => ({ ...current, dashboardPassword: event.target.value }))}
+                    type="password"
                     className="mt-2 w-full rounded-xl bg-input border border-border px-4 py-3 outline-none focus:border-primary text-sm"
                   />
                 </label>
