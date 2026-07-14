@@ -1,5 +1,5 @@
 {
-  "name": "sheintel-rsvp",
+  "name": "sheintel-turn-eighteen",
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
