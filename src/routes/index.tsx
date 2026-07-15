@@ -145,7 +145,7 @@ function Nav() {
         {items.map(([l, h]) => (
           <a key={h} href={h} className="text-foreground/70 hover:text-primary transition-colors">{l}</a>
         ))}
-        <a href="/dashboard" className="text-primary hover:brightness-125 transition-colors inline-flex items-center gap-2">
+        <a href="/rsvp-console" className="text-primary hover:brightness-125 transition-colors inline-flex items-center gap-2">
           <span>Dashboard</span>
         </a>
       </div>
@@ -521,7 +521,7 @@ function Rsvp() {
             />
           </label>
           <p className="text-xs text-foreground/60 leading-relaxed">
-            Dashboard: <a href="/dashboard" className="text-primary hover:underline">/dashboard</a> · The sheet must have an Apps Script Web App URL saved there before submissions will appear in Google Sheets.
+            Dashboard: <a href="/rsvp-console" className="text-primary hover:underline">/rsvp-console</a> · The sheet must have an Apps Script Web App URL saved there before submissions will appear in Google Sheets.
           </p>
           <button className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2 disabled:opacity-70" disabled={status === "sending"}>
             {status === "sent" ? (
