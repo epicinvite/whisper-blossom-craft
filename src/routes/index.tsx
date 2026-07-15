@@ -469,14 +469,11 @@ function Rsvp() {
       message: entry.message,
     });
 
-    // Also write to Google Sheet if Apps Script is configured
-    const config = getSheetConfig();
-    if (config.scriptUrl.trim()) {
-      try {
-        await submitRsvpToSheet(entry);
-      } catch (_error) {
-        // silently ignore sheet errors — attendance is still confirmed
-      }
+    // Write to Google Sheet via the deployed Apps Script
+    try {
+      await submitRsvpToSheet(entry);
+    } catch (_error) {
+      // silently ignore sheet errors — attendance is still confirmed
     }
 
     setStatus("sent");

@@ -2,6 +2,7 @@ export const RSVP_SHEET_STORAGE_KEY = "rsvp_sheet_config";
 export const RSVP_SHEET_ID = "1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI";
 export const RSVP_SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${RSVP_SHEET_ID}/edit?gid=0#gid=0`;
 export const RSVP_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${RSVP_SHEET_ID}/export?format=csv&gid=0`;
+export const RSVP_DEPLOYED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0pU_ykI7fmmSe422qvXtHINHKYZW2Cvdinyuf4rol6MMZTopBCVZLhg2SOjuqSKOA/exec";
 
 export type RsvpAttendance = "attending" | "declined";
 
@@ -197,19 +198,14 @@ export async function fetchSheetRows(csvUrl?: string): Promise<RsvpSheetRow[]> {
 }
 
 async function postToSheet(action: string, payload: Record<string, string | number>) {
-  const config = getSheetConfig();
-  const scriptUrl = normalizeText(config.scriptUrl);
-  if (!scriptUrl) {
-    throw new Error("Apps Script URL is not set.");
-  }
-
+  // Always use the deployed Apps Script URL so submissions write to the sheet directly
   const body = new FormData();
   body.append("action", action);
   Object.entries(payload).forEach(([key, value]) => {
     body.append(key, String(value ?? ""));
   });
 
-  await fetch(scriptUrl, {
+  await fetch(RSVP_DEPLOYED_SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
     body,
