@@ -367,7 +367,7 @@
 
     // ---------- Login ----------
     var loginScreen=document.getElementById('loginScreen'), dashboardScreen=document.getElementById('dashboardScreen');
-    const login=function(){
+    window.login=function(){
       var user=document.getElementById('loginUser').value.trim();
       var pass=document.getElementById('loginPass').value;
       var cfg=ls_get(LS_CONFIG,{});
