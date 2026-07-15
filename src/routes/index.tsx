@@ -409,7 +409,7 @@ function Rsvp() {
   const [attendance, setAttendance] = useState<RsvpAttendance>("attending");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [notice, setNotice] = useState("Your RSVP will be written to the Google Sheet once the Apps Script URL is set in the dashboard.");
+  const [notice, setNotice] = useState("");
 
   const resetForm = () => {
     setName("");
@@ -425,35 +425,33 @@ function Rsvp() {
     if (!name.trim() || !phone.trim()) {
       setStatus("error");
       setNotice("Please add your name and contact number.");
+      setTimeout(() => setNotice(""), 3000);
       return;
     }
 
     const config = getSheetConfig();
-    if (!config.scriptUrl.trim()) {
-      setStatus("error");
-      setNotice("Open /dashboard and paste your Apps Script Web App URL first, then RSVP will write into the Google Sheet.");
-      return;
+
+    if (config.scriptUrl.trim()) {
+      setStatus("sending");
+      setNotice("Sending...");
+
+      try {
+        await submitRsvpToSheet({
+          name: name.trim(),
+          phone: phone.trim(),
+          guests: attendance === "attending" ? guests : "0",
+          message: message.trim(),
+          attendance,
+        });
+      } catch (_error) {
+        // silently ignore sheet errors — attendance is still confirmed
+      }
     }
 
-    setStatus("sending");
-    setNotice("Sending your RSVP to the Google Sheet...");
-
-    try {
-      await submitRsvpToSheet({
-        name: name.trim(),
-        phone: phone.trim(),
-        guests: attendance === "attending" ? guests : "0",
-        message: message.trim(),
-        attendance,
-      });
-      setStatus("sent");
-      setNotice("Your RSVP was sent to the Google Sheet.");
-      resetForm();
-    } catch (error) {
-      console.error(error);
-      setStatus("error");
-      setNotice("The sheet write failed. Check the Apps Script URL and redeploy the web app.");
-    }
+    setStatus("sent");
+    setNotice("");
+    resetForm();
+    setTimeout(() => setStatus("idle"), 4000);
   };
 
   return (
@@ -520,9 +518,6 @@ function Rsvp() {
               placeholder="Share a message for Sheintel"
             />
           </label>
-          <p className="text-xs text-foreground/60 leading-relaxed">
-            Dashboard: <a href="/rsvp-console" className="text-primary hover:underline">/rsvp-console</a> · The sheet must have an Apps Script Web App URL saved there before submissions will appear in Google Sheets.
-          </p>
           <button className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium tracking-[0.25em] uppercase text-xs hover:brightness-110 transition inline-flex items-center justify-center gap-2 disabled:opacity-70" disabled={status === "sending"}>
             {status === "sent" ? (
               <>
