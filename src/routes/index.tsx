@@ -719,9 +719,6 @@ function Gift() {
           <div className="mx-auto w-48 h-48 rounded-2xl bg-white border border-border grid place-items-center overflow-hidden mb-6">
             <img src="/qr-michelle.jpg" alt="QR code for monetary gift" className="w-full h-full object-cover" />
           </div>
-          <div className="flex flex-wrap justify-center gap-2 mb-6 text-xs tracking-[0.25em] uppercase text-primary/80">
-            <span>GCash</span><span>·</span><span>Maya</span><span>·</span><span>Bank Transfer</span>
-          </div>
           <div className="font-serif text-2xl mb-1">Michelle M.</div>
           <div className="text-foreground/60 mb-6">+63 908 083 XXXX</div>
           <div className="flex flex-wrap justify-center gap-3">
