@@ -225,7 +225,7 @@
         <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input type="text" class="search-input" id="searchInput" placeholder="Search by name, phone..."></div>
         <div class="filter-row"><select class="filter-select" id="filterStatus"><option value="all">All Responses</option><option value="attending">Attending</option><option value="declined">Not Attending</option></select><select class="filter-select" id="sortBy"><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="name_az">Name A-Z</option><option value="name_za">Name Z-A</option><option value="seats_hi">Most Seats</option></select></div>
       </div>
-      <div class="glass-card" style="padding:0; overflow:hidden;"><div class="table-wrap"><table class="guest-table" id="guestTable"><thead><tr><th>#</th><th>Name</th><th>Seats</th><th>Phone</th><th>Message</th><th>Status</th><th>Actions</th></tr></thead><tbody id="guestTableBody"><tr><td colspan="7"><div class="loading-state"><div class="spinner"></div>Loading guest list...</div></td></tr></tbody></table></div><div style="padding:12px 20px; border-top:1px solid var(--border-gold); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><p style="font-size:.78rem; color:var(--text-muted);" id="tableCount">Showing 0 guests</p><p style="font-size:.78rem; color:var(--text-muted);">Data stored locally in your browser only.</p></div></div>
+      <div class="glass-card" style="padding:0; overflow:hidden;"><div class="table-wrap"><table class="guest-table" id="guestTable"><thead><tr><th>#</th><th>Name</th><th>Seats</th><th>Phone</th><th>Message</th><th>Status</th><th>Actions</th></tr></thead><tbody id="guestTableBody"><tr><td colspan="7"><div class="loading-state"><div class="spinner"></div>Loading guest list...</div></td></tr></tbody></table></div><div style="padding:12px 20px; border-top:1px solid var(--border-gold); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><p style="font-size:.78rem; color:var(--text-muted);" id="tableCount">Showing 0 guests</p><p style="font-size:.78rem; color:var(--success);">✓ Live data · Synced in real-time</p></div></div>
     </main>
   </div>
 
@@ -241,46 +241,136 @@
   <!-- Toast -->
   <div class="toast" id="toast"><i id="toastIcon" class="fa-solid fa-circle-check"></i><span id="toastMsg">Done!</span></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const LS_RSVP = 'rsvp_submissions';
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://eluyhzqlkupamfqhzpif.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsdXloenFsa3VwYW1mcWh6cGlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2NDA4MTMsImV4cCI6MjAyNTIxNjgxM30.H7E-waDOJvOZTOPl1KvlXk1a6XsNqYpRGLU9CqKR3E4';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const LS_CONFIG = 'rsvp_celebrant_config';
-    const LS_SHEET_CONFIG = 'rsvp_sheet_config';
     const DEFAULT_USER = 'sheintel';
     const DEFAULT_PASS = '082226';
-    const RSVP_SHEET_EDIT_URL = 'https://docs.google.com/spreadsheets/d/1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI/edit';
 
-    // Pre-populate sheet config if not set so the live site form can write to the sheet
-    (function(){try{if(!localStorage.getItem(LS_SHEET_CONFIG)){localStorage.setItem(LS_SHEET_CONFIG,JSON.stringify({sheetId:'1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI',csvUrl:'https://docs.google.com/spreadsheets/d/1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI/export?format=csv&gid=0',scriptUrl:'',dashboardUsername:'sheintel',dashboardPassword:'082226'}));}}catch(e){}})();
     const ls_get = (k,def)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def};};
     const ls_set = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{};};
 
-    // SAFE escHtml — builds HTML entity strings at runtime to avoid HTML entities in JS source
     const escHtml = function(s){
-  var a=String(s);
-  a=a.replace(/&/g,String.fromCharCode(38)+'amp;');
-  a=a.replace(/</g,String.fromCharCode(38)+'lt;');
-  a=a.replace(/>/g,String.fromCharCode(38)+'gt;');
-  a=a.replace(/"/g,String.fromCharCode(38)+'quot;');
-  a=a.replace(/'/g,String.fromCharCode(38)+'#'+'x27;');
-  return a;
-};
+      var a=String(s);
+      a=a.replace(/&/g,String.fromCharCode(38)+'amp;');
+      a=a.replace(/</g,String.fromCharCode(38)+'lt;');
+      a=a.replace(/>/g,String.fromCharCode(38)+'gt;');
+      a=a.replace(/"/g,String.fromCharCode(38)+'quot;');
+      a=a.replace(/'/g,String.fromCharCode(38)+'#'+'x27;');
+      return a;
+    };
+
+    let guestsCache = [];
+    let isLoading = false;
 
     const showToast=(msg,type)=>{if(!type)type='success';const toast=document.getElementById('toast'),icon=document.getElementById('toastIcon'),txt=document.getElementById('toastMsg');txt.textContent=msg;icon.className=type==='success'?'fa-solid fa-circle-check':type==='error'?'fa-solid fa-circle-xmark':'fa-solid fa-triangle-exclamation';toast.className='toast show '+type;clearTimeout(toast._t);toast._t=setTimeout(function(){toast.className='toast';},4000);};
+    
     const showConfirm=(title,msg,ok)=>{document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;var dlg=document.getElementById('confirmDialog');dlg.classList.add('show');var okBtn=document.getElementById('confirmOk'),cancelBtn=document.getElementById('confirmCancel');var close=function(){dlg.classList.remove('show');};okBtn.onclick=function(){close();ok();};cancelBtn.onclick=close;};
-    const migrateGuests=()=>{var g=ls_get(LS_RSVP,[]),changed=false;g.forEach(function(x){if(!x.id){x.id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);changed=true;}if(!x.addedAt){x.addedAt=new Date().toISOString();changed=true;}if(x.canAttend==='Yes'){x.status='attending';changed=true;}else if(x.cantAttend==='Yes'){x.status='declined';changed=true;}else if(!x.status){x.status='attending';changed=true;}if(x.guests===undefined){x.guests=x.guestCount||1;changed=true;}});if(changed)ls_set(LS_RSVP,g);};
-    const getConfig=()=>ls_get(LS_CONFIG,{});
-    const getGuests=()=>ls_get(LS_RSVP,[]);
-    const saveGuests=function(a){ls_set(LS_RSVP,a);};
-    const addGuest=function(guest){var arr=getGuests();arr.push({...guest,id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),addedAt:new Date().toISOString()});saveGuests(arr);};
-    const updateGuest=function(id,patch){saveGuests(getGuests().map(function(g){return g.id===id?{...g,...patch}:g;}));};
-    const deleteGuest=function(id){saveGuests(getGuests().filter(function(g){return g.id!==id;}));};
+
+    // Supabase operations
+    const fetchGuests = async () => {
+      try {
+        isLoading = true;
+        const { data, error } = await supabase
+          .from('rsvp_responses')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        guestsCache = (data || []).map(g => ({
+          id: g.id,
+          name: g.name || '',
+          guests: g.seats || 1,
+          phone: g.phone || '',
+          message: g.message || '',
+          status: g.status === 'declined' ? 'declined' : 'attending',
+          addedAt: g.created_at
+        }));
+        isLoading = false;
+        return guestsCache;
+      } catch (error) {
+        console.error('Error fetching guests:', error);
+        isLoading = false;
+        showToast('Error loading guests: ' + error.message, 'error');
+        return [];
+      }
+    };
+
+    const addGuest = async (guest) => {
+      try {
+        const { data, error } = await supabase
+          .from('rsvp_responses')
+          .insert([{
+            name: guest.name,
+            seats: parseInt(guest.guests) || 1,
+            phone: guest.phone,
+            message: guest.message,
+            status: guest.status === 'declined' ? 'declined' : 'attending'
+          }])
+          .select();
+        
+        if (error) throw error;
+        await fetchGuests();
+        return true;
+      } catch (error) {
+        console.error('Error adding guest:', error);
+        showToast('Error adding guest: ' + error.message, 'error');
+        return false;
+      }
+    };
+
+    const updateGuest = async (id, patch) => {
+      try {
+        const { error } = await supabase
+          .from('rsvp_responses')
+          .update({
+            name: patch.name,
+            seats: parseInt(patch.guests) || 1,
+            phone: patch.phone,
+            message: patch.message,
+            status: patch.status === 'declined' ? 'declined' : 'attending'
+          })
+          .eq('id', id);
+        
+        if (error) throw error;
+        await fetchGuests();
+        return true;
+      } catch (error) {
+        console.error('Error updating guest:', error);
+        showToast('Error updating guest: ' + error.message, 'error');
+        return false;
+      }
+    };
+
+    const deleteGuest = async (id) => {
+      try {
+        const { error } = await supabase
+          .from('rsvp_responses')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
+        await fetchGuests();
+        return true;
+      } catch (error) {
+        console.error('Error deleting guest:', error);
+        showToast('Error deleting guest: ' + error.message, 'error');
+        return false;
+      }
+    };
 
     // ---------- Login ----------
     var loginScreen=document.getElementById('loginScreen'), dashboardScreen=document.getElementById('dashboardScreen');
     const login=function(){
       var user=document.getElementById('loginUser').value.trim();
       var pass=document.getElementById('loginPass').value;
-      var cfg=getConfig();
+      var cfg=ls_get(LS_CONFIG,{});
       var correctUser=cfg.username||DEFAULT_USER;
       var correctPass=cfg.password||DEFAULT_PASS;
       if(user===correctUser && pass===correctPass){
@@ -296,40 +386,40 @@
     document.getElementById('logoutBtn').addEventListener('click',function(){dashboardScreen.classList.remove('active');loginScreen.style.display='';document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';});
 
     // ---------- Stats ----------
-    const computeStats=function(guests){var cfg=getConfig(); var capacity=parseInt(cfg.capacity)||150; var attending=guests.filter(function(g){return g.status==='attending';}); var declined=guests.filter(function(g){return g.status==='declined';}); var totalSeats=attending.reduce(function(s,g){return s+(parseInt(g.guests)||1);},0); return {attending:attending,declined:declined,totalSeats:totalSeats,capacity:capacity,total:attending.length+declined.length};};
+    const computeStats=function(guests){var cfg=ls_get(LS_CONFIG,{}); var capacity=parseInt(cfg.capacity)||150; var attending=guests.filter(function(g){return g.status==='attending';}); var declined=guests.filter(function(g){return g.status==='declined';}); var totalSeats=attending.reduce(function(s,g){return s+(parseInt(g.guests)||1);},0); return {attending:attending,declined:declined,totalSeats:totalSeats,capacity:capacity,total:attending.length+declined.length};};
     const renderStats=function(g){var st=computeStats(g); document.getElementById('statTotal').textContent=st.total; document.getElementById('statAttending').textContent=st.attending.length; document.getElementById('statDeclined').textContent=st.declined.length; document.getElementById('statSeats').textContent=st.totalSeats; document.getElementById('capacityLabel').textContent=st.capacity;};
 
     // ---------- Table ----------
     var curSearch='', curFilter='all', curSort='newest';
-    const renderTable=function(){var guests=getGuests(); if(curFilter==='attending') guests=guests.filter(function(g){return g.status==='attending';}); else if(curFilter==='declined') guests=guests.filter(function(g){return g.status==='declined';}); if(curSearch.trim()){var q=curSearch.toLowerCase(); guests=guests.filter(function(g){return (g.name||'').toLowerCase().includes(q)||(g.phone||'').toLowerCase().includes(q)||(g.message||'').toLowerCase().includes(q);});}
+    const renderTable=function(){var guests=guestsCache; if(curFilter==='attending') guests=guests.filter(function(g){return g.status==='attending';}); else if(curFilter==='declined') guests=guests.filter(function(g){return g.status==='declined';}); if(curSearch.trim()){var q=curSearch.toLowerCase(); guests=guests.filter(function(g){return (g.name||'').toLowerCase().includes(q)||(g.phone||'').toLowerCase().includes(q)||(g.message||'').toLowerCase().includes(q);});}
       if(curSort==='newest') guests=[].concat(guests).reverse(); else if(curSort==='name_az') guests=[].concat(guests).sort(function(a,b){return(a.name||'').localeCompare(b.name||'');}); else if(curSort==='name_za') guests=[].concat(guests).sort(function(a,b){return(b.name||'').localeCompare(a.name||'');}); else if(curSort==='seats_hi') guests=[].concat(guests).sort(function(a,b){return(parseInt(b.guests)||1)-(parseInt(a.guests)||1);});
       var tbody=document.getElementById('guestTableBody'); document.getElementById('tableCount').textContent='Showing '+guests.length+' guest'+(guests.length!==1?'s':'');
       if(guests.length===0){tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-inbox"></i> No guests found. Add one manually or share the invitation link!</div></td></tr>'; return;}
       tbody.innerHTML=''; guests.forEach(function(g,i){var seats=parseInt(g.guests)||1; var status=g.status; var msgSnip=(g.message||'\u2014').length>40?(g.message||'\u2014').slice(0,40)+'\u2026':(g.message||'\u2014'); var tr=document.createElement('tr'); tr.innerHTML='<td style="color:var(--text-muted); font-size:.8rem;">'+(i+1)+'</td><td><strong>'+escHtml(g.name||'\u2014')+'</strong></td><td>'+(status==='attending'?'<span style="font-family:var(--font-serif); font-size:1.2rem; color:var(--gold-light);">'+seats+'</span>':'<span style="color:var(--text-muted);">\u2014</span>')+'</td><td style="color:var(--text-muted); font-size:.85rem;">'+escHtml(g.phone||'\u2014')+'</td><td style="color:var(--text-muted); font-size:.82rem;" title="'+escHtml(g.message||'')+'">'+escHtml(msgSnip)+'</td><td><select class="status-select" data-id="'+g.id+'" onchange="changeStatus(this)"><option value="attending" '+(status==='attending'?'selected':'')+'>Attending</option><option value="declined" '+(status==='declined'?'selected':'')+'>Declined</option></select></td><td><button class="tbl-action-btn" title="Edit" onclick="openEditModal(\''+g.id+'\')"><i class="fa-solid fa-pen-to-square"></i></button><button class="tbl-action-btn" title="Delete" onclick="confirmDelete(\''+g.id+'\',\''+escHtml(g.name||'')+'\')"><i class="fa-solid fa-trash-can"></i></button></td>'; tbody.appendChild(tr);}); };
 
-    const changeStatus=function(sel){var id=sel.dataset.id, val=sel.value; updateGuest(id,{status:val, canAttend:val==='attending'?'Yes':'', cantAttend:val==='declined'?'Yes':''}); renderDashboard(); showToast('Status updated!');};
-    const confirmDelete=function(id,name){showConfirm('Delete Guest?','Remove "'+name+'" from the guest list? This cannot be undone.',function(){deleteGuest(id); renderDashboard(); showToast('Guest removed.', 'warn');});};
+    const changeStatus=async function(sel){var id=sel.dataset.id, val=sel.value; var g=guestsCache.find(x=>x.id===id); if(g) {await updateGuest(id,{...g,status:val}); renderDashboard(); showToast('Status updated!');}};
+    const confirmDelete=function(id,name){showConfirm('Delete Guest?','Remove "'+name+'" from the guest list? This cannot be undone.',async function(){const ok=await deleteGuest(id); if(ok) {renderDashboard(); showToast('Guest removed.', 'warn');}});};
 
     // ---------- Guest Modal ----------
     var editingId=null;
     const openAddModal=function(){editingId=null;document.getElementById('guestModalTitle').textContent='Add Guest';document.getElementById('mgName').value='';document.getElementById('mgStatus').value='attending';document.getElementById('mgGuests').value='1';document.getElementById('mgPhone').value='';document.getElementById('mgMessage').value='';document.getElementById('mgSeatGroup').style.display='';document.getElementById('guestModal').classList.add('show');document.getElementById('mgName').focus();};
-    const openEditModal=function(id){var g=getGuests().find(function(x){return x.id===id;}); if(!g) return; editingId=id; document.getElementById('guestModalTitle').textContent='Edit Guest'; document.getElementById('mgName').value=g.name||''; document.getElementById('mgStatus').value=g.status||'attending'; document.getElementById('mgGuests').value=String(parseInt(g.guests)||1); document.getElementById('mgPhone').value=g.phone||''; document.getElementById('mgMessage').value=g.message||''; document.getElementById('mgSeatGroup').style.display=g.status==='declined'?'none':''; document.getElementById('guestModal').classList.add('show'); document.getElementById('mgName').focus(); };
+    const openEditModal=function(id){var g=guestsCache.find(function(x){return x.id===id;}); if(!g) return; editingId=id; document.getElementById('guestModalTitle').textContent='Edit Guest'; document.getElementById('mgName').value=g.name||''; document.getElementById('mgStatus').value=g.status||'attending'; document.getElementById('mgGuests').value=String(parseInt(g.guests)||1); document.getElementById('mgPhone').value=g.phone||''; document.getElementById('mgMessage').value=g.message||''; document.getElementById('mgSeatGroup').style.display=g.status==='declined'?'none':''; document.getElementById('guestModal').classList.add('show'); document.getElementById('mgName').focus(); };
     const closeGuestModal=function(){document.getElementById('guestModal').classList.remove('show'); editingId=null;};
     document.getElementById('mgStatus').addEventListener('change',function(){document.getElementById('mgSeatGroup').style.display=this.value==='declined'?'none':'';});
-    document.getElementById('guestModalSave').addEventListener('click',function(){var name=document.getElementById('mgName').value.trim(); var status=document.getElementById('mgStatus').value; var guests=document.getElementById('mgGuests').value; var phone=document.getElementById('mgPhone').value.trim(); var message=document.getElementById('mgMessage').value.trim(); if(!name){showToast('Please enter a name.', 'error'); return;} var payload={name:name,status:status,guests:status==='declined'?'0':guests,phone:phone,message:message,canAttend:status==='attending'?'Yes':'',cantAttend:status==='declined'?'Yes':''}; if(editingId){updateGuest(editingId,payload); showToast('Guest updated!');} else {addGuest(payload); showToast('Guest added!');} closeGuestModal(); renderDashboard();});
+    document.getElementById('guestModalSave').addEventListener('click',async function(){var name=document.getElementById('mgName').value.trim(); var status=document.getElementById('mgStatus').value; var guests=document.getElementById('mgGuests').value; var phone=document.getElementById('mgPhone').value.trim(); var message=document.getElementById('mgMessage').value.trim(); if(!name){showToast('Please enter a name.', 'error'); return;} var payload={name:name,status:status,guests:status==='declined'?'0':guests,phone:phone,message:message}; var ok; if(editingId){ok=await updateGuest(editingId,payload); if(ok) showToast('Guest updated!');} else {ok=await addGuest(payload); if(ok) showToast('Guest added!');} if(ok) {closeGuestModal(); renderDashboard();}});
     document.getElementById('addGuestBtn').addEventListener('click',openAddModal);
     document.getElementById('guestModalClose').addEventListener('click',closeGuestModal);
     document.getElementById('guestModalCancel').addEventListener('click',closeGuestModal);
     document.getElementById('guestModal').addEventListener('click',function(e){if(e.target===e.currentTarget) closeGuestModal();});
 
     // ---------- Settings ----------
-    const openSettings=function(){var cfg=getConfig(); document.getElementById('sUsername').value=cfg.username||DEFAULT_USER; document.getElementById('sPassword').value=''; document.getElementById('sRSVP').value=cfg.name||'Sheintel'; document.getElementById('sCapacity').value=cfg.capacity||'150'; document.getElementById('sDeadline').value=cfg.deadline||''; document.getElementById('sScriptUrl').value=cfg.scriptUrl||''; document.getElementById('settingsModal').classList.add('show');};
+    const openSettings=function(){var cfg=ls_get(LS_CONFIG,{}); document.getElementById('sUsername').value=cfg.username||DEFAULT_USER; document.getElementById('sPassword').value=''; document.getElementById('sRSVP').value=cfg.name||'Sheintel'; document.getElementById('sCapacity').value=cfg.capacity||'150'; document.getElementById('sDeadline').value=cfg.deadline||''; document.getElementById('sScriptUrl').value=cfg.scriptUrl||''; document.getElementById('settingsModal').classList.add('show');};
     const closeSettings=function(){document.getElementById('settingsModal').classList.remove('show');};
     document.getElementById('settingsBtn').addEventListener('click',openSettings);
     document.getElementById('settingsClose').addEventListener('click',closeSettings);
     document.getElementById('settingsCancel').addEventListener('click',closeSettings);
     document.getElementById('settingsModal').addEventListener('click',function(e){if(e.target===e.currentTarget) closeSettings();});
-    document.getElementById('settingsSave').addEventListener('click',function(){var cfg=getConfig(); var newUser=document.getElementById('sUsername').value.trim(); var newPass=document.getElementById('sPassword').value; var name=document.getElementById('sRSVP').value.trim(); var capacity=parseInt(document.getElementById('sCapacity').value)||150; var deadline=document.getElementById('sDeadline').value; var scriptUrl=document.getElementById('sScriptUrl').value.trim(); var upd={...cfg,name:name||'Sheintel',capacity:capacity,deadline:deadline,scriptUrl:scriptUrl}; if(newUser) upd.username=newUser; if(newPass) upd.password=newPass; ls_set(LS_CONFIG,upd); try{var sc=JSON.parse(localStorage.getItem(LS_SHEET_CONFIG)||'{}');sc.scriptUrl=scriptUrl;localStorage.setItem(LS_SHEET_CONFIG,JSON.stringify(sc));}catch(e){} closeSettings(); renderDashboard(); showToast('Settings saved!');});
+    document.getElementById('settingsSave').addEventListener('click',function(){var cfg=ls_get(LS_CONFIG,{}); var newUser=document.getElementById('sUsername').value.trim(); var newPass=document.getElementById('sPassword').value; var name=document.getElementById('sRSVP').value.trim(); var capacity=parseInt(document.getElementById('sCapacity').value)||150; var deadline=document.getElementById('sDeadline').value; var scriptUrl=document.getElementById('sScriptUrl').value.trim(); var upd={...cfg,name:name||'Sheintel',capacity:capacity,deadline:deadline,scriptUrl:scriptUrl}; if(newUser) upd.username=newUser; if(newPass) upd.password=newPass; ls_set(LS_CONFIG,upd); closeSettings(); renderDashboard(); showToast('Settings saved!');});
 
     // ---------- Search & Filter ----------
     document.getElementById('searchInput').addEventListener('input',function(e){curSearch=e.target.value; renderTable();});
@@ -337,16 +427,16 @@
     document.getElementById('sortBy').addEventListener('change',function(e){curSort=e.target.value; renderTable();});
 
     // ---------- Export ----------
-    document.getElementById('exportBtn').addEventListener('click',function(){var guests=getGuests(); if(guests.length===0){showToast('No data to export.', 'warn'); return;} var headers=['#','Name','Status','Seats','Phone','Message','Added']; var rows=guests.map(function(g,i){return [i+1,'"'+((g.name||'').replace(/"/g,'""'))+'"',g.status==='attending'?'Attending':'Declined',g.status==='attending'?parseInt(g.guests)||1:0,'"'+((g.phone||'').replace(/"/g,'""'))+'"','"'+((g.message||'').replace(/"/g,'""'))+'"',g.addedAt?new Date(g.addedAt).toLocaleString():'']; }); var csv=[headers].concat(rows).map(function(r){return r.join(',');}).join('\r\n'); var blob=new Blob([csv],{type:'text/csv'}); var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='sheintel18_rsvp_'+new Date().toISOString().slice(0,10)+'.csv'; a.click(); URL.revokeObjectURL(url); showToast('CSV exported!');});
+    document.getElementById('exportBtn').addEventListener('click',function(){var guests=guestsCache; if(guests.length===0){showToast('No data to export.', 'warn'); return;} var headers=['#','Name','Status','Seats','Phone','Message','Added']; var rows=guests.map(function(g,i){return [i+1,'"'+((g.name||'').replace(/"/g,'""'))+'"',g.status==='attending'?'Attending':'Declined',g.status==='attending'?parseInt(g.guests)||1:0,'"'+((g.phone||'').replace(/"/g,'""'))+'"','"'+((g.message||'').replace(/"/g,'""'))+'"',g.addedAt?new Date(g.addedAt).toLocaleString():'']; }); var csv=[headers].concat(rows).map(function(r){return r.join(',');}).join('\r\n'); var blob=new Blob([csv],{type:'text/csv'}); var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='sheintel18_rsvp_'+new Date().toISOString().slice(0,10)+'.csv'; a.click(); URL.revokeObjectURL(url); showToast('CSV exported!');});
 
     // ---------- Clear All ----------
-    document.getElementById('clearAllBtn').addEventListener('click',function(){var guests=getGuests(); if(guests.length===0){showToast('No data to clear.', 'warn'); return;} showConfirm('Clear All Guests?','This will permanently delete all '+guests.length+' entries. This cannot be undone.',function(){saveGuests([]); renderDashboard(); showToast('All guests cleared.', 'warn');});});
+    document.getElementById('clearAllBtn').addEventListener('click',function(){if(guestsCache.length===0){showToast('No data to clear.', 'warn'); return;} showConfirm('Clear All Guests?','This will permanently delete all '+guestsCache.length+' entries. This cannot be undone.',async function(){for(const g of guestsCache) await deleteGuest(g.id); renderDashboard(); showToast('All guests cleared.', 'warn');});});
 
     // ---------- Refresh ----------
     document.getElementById('refreshBtn').addEventListener('click',function(){renderDashboard(); showToast('Dashboard refreshed!');});
 
     // ---------- Main Render ----------
-    const renderDashboard=function(){migrateGuests(); var guests=getGuests(); renderStats(guests); renderTable();};
+    const renderDashboard=async function(){var guests=await fetchGuests(); renderStats(guests); renderTable();};
 
     // ---------- Global Key ----------
     document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeGuestModal(); closeSettings(); document.getElementById('confirmDialog').classList.remove('show');}});
