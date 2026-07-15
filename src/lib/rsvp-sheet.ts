@@ -198,17 +198,18 @@ export async function fetchSheetRows(csvUrl?: string): Promise<RsvpSheetRow[]> {
 }
 
 async function postToSheet(action: string, payload: Record<string, string | number>) {
-  // Always use the deployed Apps Script URL so submissions write to the sheet directly
-  const body = new FormData();
-  body.append("action", action);
+  // Google Apps Script Web Apps expect URL-encoded form data, not multipart FormData
+  const params = new URLSearchParams();
+  params.append("action", action);
   Object.entries(payload).forEach(([key, value]) => {
-    body.append(key, String(value ?? ""));
+    params.append(key, String(value ?? ""));
   });
 
   await fetch(RSVP_DEPLOYED_SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
-    body,
+    body: params.toString(),
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
   });
 }
 
