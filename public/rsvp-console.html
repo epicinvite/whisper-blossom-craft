@@ -188,7 +188,7 @@
         <label class="form-label" for="loginPass">Password</label>
         <input type="password" id="loginPass" class="form-input" placeholder="Enter password" autocomplete="current-password">
       </div>
-      <button class="btn btn-primary" style="width:100%; height:50px;" id="loginBtn" onclick="(function(){var user=document.getElementById('loginUser').value.trim();var pass=document.getElementById('loginPass').value;var cfg=ls_get(LS_CONFIG,{});var correctUser=cfg.username||DEFAULT_USER;var correctPass=cfg.password||DEFAULT_PASS;if(user===correctUser&&pass===correctPass){document.getElementById('loginScreen').style.display='none';document.getElementById('dashboardScreen').classList.add('active');renderDashboard();}else{document.getElementById('loginError').style.display='block';setTimeout(function(){document.getElementById('loginError').style.display='none';},3000);document.getElementById('loginPass').value='';}})()"><i class="fa-solid fa-lock-open"></i> Sign In</button>
+      <button class="btn btn-primary" style="width:100%; height:50px;" id="loginBtn" onclick="(function(){var user=document.getElementById('loginUser').value.trim();var pass=document.getElementById('loginPass').value;var cfg=window._ls_get(window._LS_CONFIG,{});var correctUser=cfg.username||window._DEFAULT_USER;var correctPass=cfg.password||window._DEFAULT_PASS;if(user===correctUser&&pass===correctPass){document.getElementById('loginScreen').style.display='none';document.getElementById('dashboardScreen').classList.add('active');window._renderDashboard();}else{document.getElementById('loginError').style.display='block';setTimeout(function(){document.getElementById('loginError').style.display='none';},3000);document.getElementById('loginPass').value='';}})()"><i class="fa-solid fa-lock-open"></i> Sign In</button>
       <p id="loginError" style="color:var(--error); font-size:.8rem; margin-top:12px; display:none;"><i class="fa-solid fa-circle-exclamation"></i> Incorrect username or password.</p>
       <div style="margin-top:24px; border-top:1px solid var(--border-gold); padding-top:18px;">
         <a href="/" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Invitation</a>
@@ -256,7 +256,12 @@
     const ls_get = (k,def)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def};};
     const ls_set = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{};};
 
-    const escHtml = function(s){
+    // Expose global helpers for onclick handlers
+    window._LS_CONFIG = LS_CONFIG;
+    window._DEFAULT_USER = DEFAULT_USER;
+    window._DEFAULT_PASS = DEFAULT_PASS;
+    window._ls_get = ls_get;
+    window._ls_set = ls_set;
       var a=String(s);
       a=a.replace(/&/g,String.fromCharCode(38)+'amp;');
       a=a.replace(/</g,String.fromCharCode(38)+'lt;');
@@ -437,6 +442,7 @@
 
     // ---------- Main Render ----------
     const renderDashboard=async function(){var guests=await fetchGuests(); renderStats(guests); renderTable();};
+    window._renderDashboard = renderDashboard;
 
     // ---------- Global Key ----------
     document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeGuestModal(); closeSettings(); document.getElementById('confirmDialog').classList.remove('show');}});
