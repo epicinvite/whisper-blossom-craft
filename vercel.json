@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/rsvp-console",
+      "destination": "/rsvp-console.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
+    }
+  ]
+}
