@@ -419,6 +419,29 @@ function Rsvp() {
     setMessage("");
   };
 
+  // Save submission to localStorage so the dashboard console sees it
+  const saveToLocalStorage = (payload: {
+    name: string;
+    status: string;
+    guests: string;
+    phone: string;
+    message: string;
+  }) => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("rsvp_submissions") || "[]");
+      stored.push({
+        ...payload,
+        id: crypto.randomUUID(),
+        addedAt: new Date().toISOString(),
+        canAttend: payload.status === "attending" ? "Yes" : "",
+        cantAttend: payload.status === "declined" ? "Yes" : "",
+      });
+      localStorage.setItem("rsvp_submissions", JSON.stringify(stored));
+    } catch {
+      // localStorage unavailable — silently skip
+    }
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -429,20 +452,28 @@ function Rsvp() {
       return;
     }
 
+    const entry = {
+      name: name.trim(),
+      phone: phone.trim(),
+      guests: attendance === "attending" ? guests : "0",
+      message: message.trim(),
+      attendance,
+    };
+
+    // Always save to localStorage for the dashboard console
+    saveToLocalStorage({
+      name: entry.name,
+      status: entry.attendance,
+      guests: entry.guests,
+      phone: entry.phone,
+      message: entry.message,
+    });
+
+    // Also write to Google Sheet if Apps Script is configured
     const config = getSheetConfig();
-
     if (config.scriptUrl.trim()) {
-      setStatus("sending");
-      setNotice("Sending...");
-
       try {
-        await submitRsvpToSheet({
-          name: name.trim(),
-          phone: phone.trim(),
-          guests: attendance === "attending" ? guests : "0",
-          message: message.trim(),
-          attendance,
-        });
+        await submitRsvpToSheet(entry);
       } catch (_error) {
         // silently ignore sheet errors — attendance is still confirmed
       }
