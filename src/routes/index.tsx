@@ -16,6 +16,7 @@ import {
   Feather,
 } from "lucide-react";
 import GoldConfetti from "@/components/GoldConfetti";
+import Footer from "@/components/Footer";
 import { getSheetConfig, submitRsvpToSheet, type RsvpAttendance } from "@/lib/rsvp-sheet";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -888,6 +889,7 @@ function Index() {
       <MiniChat />
       <Gallery />
       <Gift />
+      <Footer />
     </main>
   );
 }
