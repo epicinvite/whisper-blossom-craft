@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP Console · Sheintel @ 18</title>
+  <meta name="description" content="RSV Dashboard — RSVP's private console for Sheintel's 18th birthday debut.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary:    #050c1a;
+      --bg-secondary:  #0a192f;
+      --bg-card:       rgba(10, 25, 47, 0.70);
+      --border-gold:   rgba(212, 175, 55, 0.25);
+      --border-gold-h: rgba(212, 175, 55, 0.55);
+      --gold-primary:  #d4af37;
+      --gold-light:    #f3e5ab;
+      --gold-dark:     #aa7c11;
+      --gold-grad:     linear-gradient(135deg, #aa7c11 0%, #d4af37 50%, #f3e5ab 100%);
+      --text-light:    #e6f1ff;
+      --text-muted:    #8892b0;
+      --success:       #4ade80;
+      --error:         #f87171;
+      --warn:          #fbbf24;
+      --font-serif:    'Cormorant Garamond', Georgia, serif;
+      --font-sans:     'Montserrat', sans-serif;
+      --card-shadow:   0 16px 40px rgba(0,0,0,0.55);
+      --glow:          0 0 22px rgba(212,175,55,0.30);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-light);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 7px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
+    h1,h2,h3,h4 { font-family: var(--font-serif); color: var(--gold-light); letter-spacing:.04em; }
+    #stars {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(circle at 50% 30%, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+      overflow: hidden;
+    }
+    .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--dur,4s) infinite ease-in-out; opacity:.15; }
+    @keyframes twinkle { 0%,100% { opacity:.15; transform:scale(.8); } 50% { opacity:.85; transform:scale(1.2); } }
+    .page { position: relative; z-index: 1; }
+    #loginScreen { position:fixed; inset:0; z-index:900; display:flex; align-items:center; justify-content:center; padding:24px; background:radial-gradient(circle at 50% 40%, var(--bg-secondary) 0%, var(--bg-primary) 100%); }
+    .login-card { max-width:420px; width:100%; text-align:center; background:var(--bg-card); border:1px solid var(--border-gold); border-radius:24px; padding:50px 40px; backdrop-filter:blur(16px); box-shadow: var(--card-shadow), var(--glow); animation:fadeUp .5s ease both; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+    .login-icon { font-size:3.8rem; margin-bottom:14px; filter:drop-shadow(0 0 12px rgba(212,175,55,.5)); }
+    .login-title { font-size:2.4rem; margin-bottom:6px; }
+    .login-subtitle { font-size:.85rem; color:var(--text-muted); margin-bottom:32px; letter-spacing:.04em; }
+    .form-label { display:block; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--gold-light); margin-bottom:8px; text-align:left; }
+    .form-input { width:100%; padding:14px 18px; background:rgba(5,12,26,.85); border:1px solid var(--border-gold); border-radius:12px; color:var(--text-light); font-family:var(--font-sans); font-size:.95rem; outline:none; transition:all .25s; }
+    .form-input:focus { border-color:var(--gold-primary); box-shadow:0 0 12px rgba(212,175,55,.22); }
+    .form-group { margin-bottom:22px; text-align:left; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 28px; font-family:var(--font-sans); font-weight:700; font-size:.85rem; letter-spacing:.1em; text-transform:uppercase; border-radius:50px; border:none; cursor:pointer; transition:all .25s; text-decoration:none; }
+    .btn-primary { background:var(--gold-grad); color:var(--bg-primary); box-shadow:0 4px 18px rgba(170,124,17,.35); }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(212,175,55,.55), var(--glow); }
+    .btn-secondary { background:transparent; border:1px solid var(--gold-primary); color:var(--gold-light); }
+    .btn-secondary:hover { background:rgba(212,175,55,.10); transform:translateY(-2px); }
+    .btn-danger { background:rgba(248,113,113,.15); border:1px solid var(--error); color:var(--error); }
+    .btn-danger:hover { background:rgba(248,113,113,.25); transform:translateY(-2px); }
+    .btn-sm { padding:8px 18px; font-size:.75rem; }
+    .btn:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
+    #dashboardScreen { display:none; min-height:100vh; flex-direction:column; }
+    #dashboardScreen.active { display:flex; }
+    .topbar { position:sticky; top:0; z-index:200; background:rgba(5,12,26,.88); backdrop-filter:blur(18px); border-bottom:1px solid var(--border-gold); padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .topbar-brand { display:flex; align-items:center; gap:12px; }
+    .topbar-brand .crown { font-size:1.6rem; filter:drop-shadow(0 0 6px rgba(212,175,55,.5)); }
+    .topbar-brand h1 { font-size:1.45rem; line-height:1; }
+    .topbar-brand p { font-size:.7rem; color:var(--text-muted); margin-top:2px; letter-spacing:.06em; }
+    .topbar-actions { display:flex; align-items:center; gap:10px; }
+    .topbar-icon-btn { background:rgba(212,175,55,.08); border:1px solid var(--border-gold); color:var(--gold-light); width:38px; height:38px; border-radius:10px; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .topbar-icon-btn:hover { background:rgba(212,175,55,.18); border-color:var(--gold-primary); }
+    .dash-main { flex:1; padding:32px; max-width:1280px; margin:0 auto; width:100%; }
+    .glass-card { background:var(--bg-card); border:1px solid var(--border-gold); border-radius:20px; backdrop-filter:blur(14px); box-shadow:var(--card-shadow); position:relative; overflow:hidden; transition:border-color .3s, box-shadow .3s; }
+    .glass-card::before { content:''; position:absolute; top:0; left:-60%; width:50%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent); transform:skewX(-20deg); transition:.7s; pointer-events:none; }
+    .glass-card:hover::before { left:130%; }
+    .glass-card:hover { border-color:var(--border-gold-h); box-shadow:var(--card-shadow), var(--glow); }
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:20px; margin-bottom:28px; }
+    .stat-card { padding:26px 24px; }
+    .stat-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--text-muted); margin-bottom:6px; }
+    .stat-value { font-family:var(--font-serif); font-size:3.2rem; font-weight:700; color:var(--gold-light); line-height:1; }
+    .stat-icon { position:absolute; top:20px; right:22px; font-size:1.5rem; opacity:.25; color:var(--gold-primary); }
+    .stat-sub { font-size:.78rem; color:var(--text-muted); margin-top:8px; }
+    .progress-card { padding:28px 30px; margin-bottom:28px; }
+    .progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+    .progress-title h3 { font-size:1.7rem; }
+    .progress-title p { font-size:.82rem; color:var(--text-muted); margin-top:3px; }
+    .progress-nums { text-align:right; }
+    .progress-big { font-family:var(--font-serif); font-size:1.9rem; font-weight:600; color:var(--gold-primary); }
+    .progress-track { height:22px; background:rgba(5,12,26,.85); border:1px solid var(--border-gold); border-radius:11px; overflow:hidden; box-shadow:inset 0 2px 6px rgba(0,0,0,.5); }
+    .progress-fill { height:100%; width:0%; background:var(--gold-grad); border-radius:11px; box-shadow:0 0 14px rgba(212,175,55,.40); transition:width 1s cubic-bezier(.1,.8,.2,1); position:relative; }
+    .progress-fill::after { content:''; position:absolute; right:0; top:50%; transform:translateY(-50%); width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 0 10px #fff, var(--glow); }
+    .progress-caption { font-size:.82rem; color:var(--text-muted); margin-top:10px; }
+    .section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+    .section-head h2 { font-size:1.8rem; }
+    .table-controls { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:14px; }
+    .search-wrap { position:relative; flex:1; max-width:340px; }
+    .search-wrap i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:.9rem; pointer-events:none; }
+    .search-input { width:100%; padding:10px 16px 10px 38px; background:rgba(5,12,26,.65); border:1px solid var(--border-gold); border-radius:10px; color:var(--text-light); font-family:var(--font-sans); font-size:.9rem; outline:none; transition:all .25s; }
+    .search-input:focus { border-color:var(--gold-primary); box-shadow:0 0 10px rgba(212,175,55,.2); }
+    .filter-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .filter-select { padding:9px 14px; background:rgba(5,12,26,.65); border:1px solid var(--border-gold); border-radius:8px; color:var(--text-light); font-family:var(--font-sans); font-size:.82rem; outline:none; cursor:pointer; }
+    .filter-select:focus { border-color:var(--gold-primary); }
+    .table-wrap { border-radius:16px; border:1px solid var(--border-gold); background:rgba(5,12,26,.40); overflow:hidden; }
+    .guest-table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    .guest-table th { background:rgba(10,25,47,.9); color:var(--gold-light); font-weight:700; font-size:.72rem; text-transform:uppercase; letter-spacing:.09em; padding:15px 20px; border-bottom:1px solid var(--border-gold); white-space:nowrap; }
+    .guest-table th.sortable { cursor:pointer; user-select:none; }
+    .guest-table th.sortable:hover { color:var(--gold-primary); }
+    .guest-table th .sort-icon { margin-left:5px; opacity:.5; }
+    .guest-table th.asc .sort-icon::after { content:' ↑'; opacity:1; }
+    .guest-table th.desc .sort-icon::after { content:' ↓'; opacity:1; }
+    .guest-table td { padding:15px 20px; border-bottom:1px solid rgba(212,175,55,.08); color:var(--text-light); vertical-align:middle; }
+    .guest-table tr:last-child td { border-bottom:none; }
+    .guest-table tr:hover td { background:rgba(212,175,55,.04); }
+    .pill { display:inline-block; padding:4px 13px; border-radius:20px; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; }
+    .pill-attending { background:rgba(74,222,128,.12); color:var(--success); border:1px solid rgba(74,222,128,.25); }
+    .pill-declined { background:rgba(248,113,113,.12); color:var(--error); border:1px solid rgba(248,113,113,.25); }
+    .pill-pending { background:rgba(136,146,176,.10); color:var(--text-muted); border:1px solid rgba(136,146,176,.2); }
+    .status-select { background:rgba(5,12,26,.7); border:1px solid var(--border-gold); border-radius:6px; color:var(--gold-light); padding:5px 9px; font-family:var(--font-sans); font-size:.82rem; outline:none; cursor:pointer; transition:border-color .2s; }
+    .status-select:focus { border-color:var(--gold-primary); }
+    .tbl-action-btn { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:1rem; padding:4px 7px; border-radius:6px; transition:all .2s; }
+    .tbl-action-btn:hover { color:var(--error); background:rgba(248,113,113,.1); }
+    .empty-state, .loading-state { text-align:center; padding:56px 20px; color:var(--text-muted); }
+    .empty-state i, .loading-state i { font-size:2.8rem; margin-bottom:16px; opacity:.4; display:block; }
+    .spinner { width:42px; height:42px; border-radius:50%; border:3px solid rgba(212,175,55,.15); border-top-color:var(--gold-primary); animation:spin 1s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .modal-overlay { position:fixed; inset:0; z-index:800; background:rgba(5,12,26,.85); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .3s; }
+    .modal-overlay.show { opacity:1; pointer-events:all; }
+    .modal-box { max-width:520px; width:100%; background:var(--bg-card); border:1px solid var(--border-gold); border-radius:22px; padding:40px; backdrop-filter:blur(16px); box-shadow:var(--card-shadow), var(--glow); transform:translateY(24px); transition:transform .3s; max-height:90vh; overflow-y:auto; }
+    .modal-overlay.show .modal-box { transform:translateY(0); }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
+    .modal-header h2 { font-size:2rem; }
+    .modal-close { background:none; border:none; color:var(--text-muted); font-size:1.6rem; cursor:pointer; transition:color .2s; line-height:1; }
+    .modal-close:hover { color:var(--gold-primary); }
+    .form-select { width:100%; padding:13px 18px; background:rgba(5,12,26,.85); border:1px solid var(--border-gold); border-radius:12px; color:var(--text-light); font-family:var(--font-sans); font-size:.95rem; outline:none; cursor:pointer; transition:all .25s; }
+    .form-select:focus { border-color:var(--gold-primary); box-shadow:0 0 10px rgba(212,175,55,.2); }
+    .settings-section-title { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--gold-primary); margin:28px 0 16px; border-bottom:1px solid var(--border-gold); padding-bottom:8px; }
+    .settings-section-title:first-of-type { margin-top:0; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(90px); background:var(--bg-secondary); border:1px solid var(--gold-primary); box-shadow:var(--card-shadow), var(--glow); padding:14px 24px; border-radius:12px; z-index:9999; display:flex; align-items:center; gap:12px; font-weight:600; font-size:.9rem; transition:transform .4s cubic-bezier(.18,.89,.32,1.28); white-space:nowrap; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.success { border-color:var(--success); color:var(--success); }
+    .toast.error { border-color:var(--error); color:var(--error); }
+    .toast.warn { border-color:var(--warn); color:var(--warn); }
+    #confirmDialog { position:fixed; inset:0; z-index:950; background:rgba(5,12,26,.90); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
+    #confirmDialog.show { opacity:1; pointer-events:all; }
+    .confirm-box { max-width:360px; width:90%; background:var(--bg-card); border:1px solid var(--border-gold); border-radius:18px; padding:36px 32px; text-align:center; box-shadow:var(--card-shadow); transform:scale(.9); transition:transform .25s; }
+    #confirmDialog.show .confirm-box { transform:scale(1); }
+    .confirm-box i { font-size:2.5rem; color:var(--error); margin-bottom:16px; }
+    .confirm-box h3 { font-size:1.6rem; margin-bottom:8px; }
+    .confirm-box p { color:var(--text-muted); font-size:.88rem; margin-bottom:24px; }
+    .confirm-actions { display:flex; gap:12px; justify-content:center; }
+    .hidden { display:none !important; }
+    @media (max-width:768px) {
+      .topbar { padding:0 16px; }
+      .topbar-brand h1 { font-size:1.1rem; }
+      .dash-main { padding:20px 16px; }
+      .stat-value { font-size:2.4rem; }
+      .section-head { flex-direction:column; align-items:stretch; }
+      .table-controls { flex-direction:column; }
+      .search-wrap { max-width:none; }
+      .guest-table th:nth-child(4), .guest-table td:nth-child(4), .guest-table th:nth-child(5), .guest-table td:nth-child(5) { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="stars"></div>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="page">
+    <div class="login-card">
+      <div class="login-icon">👑</div>
+      <h1 class="login-title">RSVP Console</h1>
+      <p class="login-subtitle">Sheintel's Private RSVP Dashboard · August 22, 2026</p>
+      <div class="form-group">
+        <label class="form-label" for="loginUser">Username</label>
+        <input type="text" id="loginUser" class="form-input" placeholder="Enter username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginPass">Password</label>
+        <input type="password" id="loginPass" class="form-input" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" style="width:100%; height:50px;" id="loginBtn"><i class="fa-solid fa-lock-open"></i> Sign In</button>
+      <p id="loginError" style="color:var(--error); font-size:.8rem; margin-top:12px; display:none;"><i class="fa-solid fa-circle-exclamation"></i> Incorrect username or password.</p>
+      <div style="margin-top:24px; border-top:1px solid var(--border-gold); padding-top:18px;">
+        <a href="/" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Invitation</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Screen -->
+  <div id="dashboardScreen" class="page">
+    <header class="topbar">
+      <div class="topbar-brand">
+        <span class="crown">👑</span>
+        <div>
+          <h1>RSVP Console</h1>
+          <p>Sheintel @ 18 · RSVP Management</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-icon-btn" id="refreshBtn" title="Refresh Data"><i class="fa-solid fa-arrows-rotate"></i></button>
+        <button class="topbar-icon-btn" id="exportBtn" title="Export CSV"><i class="fa-solid fa-file-csv"></i></button>
+        <button class="topbar-icon-btn" id="settingsBtn" title="Settings"><i class="fa-solid fa-gear"></i></button>
+        <button class="btn btn-secondary btn-sm" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </header>
+    <main class="dash-main">
+      <div class="stats-row" id="statsRow">
+        <div class="glass-card stat-card"><i class="stat-icon fa-solid fa-users"></i><div class="stat-label">Total Responses</div><div class="stat-value" id="statTotal">0</div><div class="stat-sub">Attending + Not Attending</div></div>
+        <div class="glass-card stat-card"><i class="stat-icon fa-solid fa-circle-check" style="color:var(--success);"></i><div class="stat-label">Attending</div><div class="stat-value" id="statAttending" style="color:var(--success);">0</div><div class="stat-sub">Confirmed guests</div></div>
+        <div class="glass-card stat-card"><i class="stat-icon fa-solid fa-circle-xmark" style="color:var(--error);"></i><div class="stat-label">Not Attending</div><div class="stat-value" id="statDeclined" style="color:var(--error);">0</div><div class="stat-sub">Can't make it</div></div>
+        <div class="glass-card stat-card"><i class="stat-icon fa-solid fa-chair" style="color:var(--warn);"></i><div class="stat-label">Total Seats</div><div class="stat-value" id="statSeats" style="color:var(--warn);">0</div><div class="stat-sub">of <span id="capacityLabel">150</span> capacity</div></div>
+      </div>
+      <div class="section-head"><h2>Guest List</h2><div style="display:flex; gap:10px; flex-wrap:wrap;"><button class="btn btn-primary btn-sm" id="addGuestBtn"><i class="fa-solid fa-plus"></i> Add Guest</button><button class="btn btn-secondary btn-sm" id="clearAllBtn"><i class="fa-solid fa-trash"></i> Clear All</button></div></div>
+      <div class="table-controls">
+        <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input type="text" class="search-input" id="searchInput" placeholder="Search by name, phone…"></div>
+        <div class="filter-row"><select class="filter-select" id="filterStatus"><option value="all">All Responses</option><option value="attending">Attending</option><option value="declined">Not Attending</option></select><select class="filter-select" id="sortBy"><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="name_az">Name A–Z</option><option value="name_za">Name Z–A</option><option value="seats_hi">Most Seats</option></select></div>
+      </div>
+      <div class="glass-card" style="padding:0; overflow:hidden;"><div class="table-wrap"><table class="guest-table" id="guestTable"><thead><tr><th>#</th><th>Name</th><th>Seats</th><th>Phone</th><th>Message</th><th>Status</th><th>Actions</th></tr></thead><tbody id="guestTableBody"><tr><td colspan="7"><div class="loading-state"><div class="spinner"></div>Loading guest list…</div></td></tr></tbody></table></div><div style="padding:12px 20px; border-top:1px solid var(--border-gold); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;"><p style="font-size:.78rem; color:var(--text-muted);" id="tableCount">Showing 0 guests</p><p style="font-size:.78rem; color:var(--text-muted);">Data stored locally in your browser only.</p></div></div>
+    </main>
+  </div>
+
+  <!-- Guest Modal -->
+  <div class="modal-overlay" id="guestModal"><div class="modal-box"><div class="modal-header"><h2 id="guestModalTitle">Add Guest</h2><button class="modal-close" id="guestModalClose">&times;</button></div><div class="form-group"><label class="form-label" for="mgName">Full Name *</label><input type="text" id="mgName" class="form-input" placeholder="e.g. Juan dela Cruz"></div><div class="form-group"><label class="form-label" for="mgStatus">Attendance</label><select id="mgStatus" class="form-select"><option value="attending">✅ Attending</option><option value="declined">❌ Not Attending</option></select></div><div class="form-group" id="mgSeatGroup"><label class="form-label" for="mgGuests">Number of Seats</label><select id="mgGuests" class="form-select"><option value="1">1 Seat</option><option value="2">2 Seats</option><option value="3">3 Seats</option><option value="4">4 Seats</option><option value="5">5 Seats</option><option value="6">6 Seats</option><option value="7">7 Seats</option><option value="8">8 Seats</option><option value="9">9 Seats</option><option value="10">10 Seats</option></select></div><div class="form-group"><label class="form-label" for="mgPhone">Phone Number</label><input type="tel" id="mgPhone" class="form-input" placeholder="e.g. +63 917 123 4567"></div><div class="form-group"><label class="form-label" for="mgMessage">Birthday Message</label><textarea id="mgMessage" class="form-input" style="resize:vertical; min-height:90px;" placeholder="Guest's birthday wish for Sheintel…"></textarea></div><div style="display:flex; gap:12px; margin-top:8px;"><button class="btn btn-secondary" id="guestModalCancel" style="flex:1;">Cancel</button><button class="btn btn-primary" id="guestModalSave" style="flex:2;"><i class="fa-solid fa-floppy-disk"></i> Save Guest</button></div></div></div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal"><div class="modal-box"><div class="modal-header"><h2>⚙️ Console Settings</h2><button class="modal-close" id="settingsClose">&times;</button></div><p class="settings-section-title">Access</p><div class="form-group"><label class="form-label" for="sUsername">Username</label><input type="text" id="sUsername" class="form-input" placeholder="sheintel" autocomplete="username"></div><div class="form-group"><label class="form-label" for="sPassword">Password</label><input type="password" id="sPassword" class="form-input" placeholder="082226" autocomplete="current-password"></div><p class="settings-section-title">Event Configuration</p><div class="form-group"><label class="form-label" for="sRSVP">RSVP Name</label><input type="text" id="sRSVP" class="form-input" placeholder="e.g. Sheintel"></div><div class="form-group"><label class="form-label" for="sCapacity">Venue Capacity (seats)</label><input type="number" id="sCapacity" class="form-input" placeholder="150" min="1" max="9999"></div><div class="form-group"><label class="form-label" for="sDeadline">RSVP Deadline</label><input type="date" id="sDeadline" class="form-input"></div><p class="settings-section-title">Google Sheets Integration (optional)</p><div class="form-group"><label class="form-label" for="sScriptUrl">Apps Script Web App URL</label><input type="url" id="sScriptUrl" class="form-input" placeholder="https://script.google.com/macros/s/…"></div><p style="font-size:.75rem; color:var(--text-muted); margin-top:-14px; margin-bottom:20px; line-height:1.6;">Paste your deployed Google Apps Script URL here to sync RSVP submissions to a Google Sheet automatically.</p><div style="display:flex; gap:12px; margin-top:8px;"><button class="btn btn-secondary" id="settingsCancel" style="flex:1;">Cancel</button><button class="btn btn-primary" id="settingsSave" style="flex:2;"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button></div></div></div>
+
+  <!-- Confirm Dialog -->
+  <div id="confirmDialog"><div class="confirm-box"><i class="fa-solid fa-triangle-exclamation"></i><h3 id="confirmTitle">Are you sure?</h3><p id="confirmMsg">This action cannot be undone.</p><div class="confirm-actions"><button class="btn btn-secondary" id="confirmCancel">Cancel</button><button class="btn btn-danger" id="confirmOk">Delete</button></div></div></div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"><i id="toastIcon" class="fa-solid fa-circle-check"></i><span id="toastMsg">Done!</span></div>
+
+  <script>
+    const LS_RSVP = 'rsvp_submissions';
+    const LS_CONFIG = 'rsvp_celebrant_config';
+    const DEFAULT_USER = 'sheintel';
+    const DEFAULT_PASS = '082226';
+    const ls_get = (k,def)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def};};
+    const ls_set = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{};};
+    function escHtml(s){return String(s).replace(/[&<>"']/g,function(c){if(c==="&")return"&";if(c==="<")return"<";if(c===">")return">";if(c==='"')return""";return"&#x27;";});}
+    const showToast=(msg,type='success')=>{const toast=document.getElementById('toast'),icon=document.getElementById('toastIcon'),txt=document.getElementById('toastMsg');txt.textContent=msg;icon.className=type==='success'?'fa-solid fa-circle-check':type==='error'?'fa-solid fa-circle-xmark':'fa-solid fa-triangle-exclamation';toast.className='toast show '+type;clearTimeout(toast._t);toast._t=setTimeout(()=>toast.className='toast',4000);};
+    const showConfirm=(title,msg,ok)=>{document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;const dlg=document.getElementById('confirmDialog');dlg.classList.add('show');const okBtn=document.getElementById('confirmOk'),cancelBtn=document.getElementById('confirmCancel');const close=()=>dlg.classList.remove('show');okBtn.onclick=()=>{close();ok();};cancelBtn.onclick=close;};
+    const migrateGuests=()=>{let g=ls_get(LS_RSVP,[]),changed=false;g.forEach(x=>{if(!x.id){x.id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);changed=true;}if(!x.addedAt){x.addedAt=new Date().toISOString();changed=true;}if(x.canAttend==='Yes'){x.status='attending';changed=true;}else if(x.cantAttend==='Yes'){x.status='declined';changed=true;}else if(!x.status){x.status='attending';changed=true;}if(x.guests===undefined){x.guests=x.guestCount||1;changed=true;}});if(changed)ls_set(LS_RSVP,g);};
+    const getConfig=()=>ls_get(LS_CONFIG,{});
+    const getGuests=()=>ls_get(LS_RSVP,[]);
+    const saveGuests=a=>ls_set(LS_RSVP,a);
+    const addGuest=guest=>{let arr=getGuests();arr.push({...guest,id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),addedAt:new Date().toISOString()});saveGuests(arr);};
+    const updateGuest=(id,patch)=>{saveGuests(getGuests().map(g=>g.id===id?{...g,...patch}:g));};
+    const deleteGuest=id=>{saveGuests(getGuests().filter(g=>g.id!==id));};
+    const login=()=>{
+      const user=document.getElementById('loginUser').value.trim();
+      const pass=document.getElementById('loginPass').value;
+      const cfg=getConfig();
+      const correctUser=cfg.username||DEFAULT_USER;
+      const correctPass=cfg.password||DEFAULT_PASS;
+      if(user===correctUser && pass===correctPass){
+        document.getElementById('loginScreen').style.display='none'; document.getElementById('dashboardScreen').classList.add('active'); renderDashboard();
+      } else {
+        document.getElementById('loginError').style.display='block';
+        setTimeout(()=>document.getElementById('loginError').style.display='none',3000);
+        document.getElementById('loginPass').value='';
+      }
+    };
+    document.getElementById('loginBtn').addEventListener('click',login);
+    document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+    document.getElementById('logoutBtn').addEventListener('click',()=>{document.getElementById('dashboardScreen').classList.remove('active');document.getElementById('loginScreen').style.display='';document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';});
+    const computeStats=guests=>{const cfg=getConfig(); const capacity=parseInt(cfg.capacity)||150; const attending=guests.filter(g=>g.status==='attending'); const declined=guests.filter(g=>g.status==='declined'); const totalSeats=attending.reduce((s,g)=>s+(parseInt(g.guests)||1),0); return {attending,declined,totalSeats,capacity,total:attending.length+declined.length};};
+    const renderStats=g=>{const st=computeStats(g); document.getElementById('statTotal').textContent=st.total; document.getElementById('statAttending').textContent=st.attending.length; document.getElementById('statDeclined').textContent=st.declined.length; document.getElementById('statSeats').textContent=st.totalSeats; document.getElementById('capacityLabel').textContent=st.capacity;};
+    let curSearch='', curFilter='all', curSort='newest';
+    const renderTable=()=>{let guests=getGuests(); if(curFilter==='attending') guests=guests.filter(g=>g.status==='attending'); else if(curFilter==='declined') guests=guests.filter(g=>g.status==='declined'); if(curSearch.trim()){const q=curSearch.toLowerCase(); guests=guests.filter(g=> (g.name||'').toLowerCase().includes(q) || (g.phone||'').toLowerCase().includes(q) || (g.message||'').toLowerCase().includes(q));}
+      if(curSort==='newest') guests=[...guests].reverse(); else if(curSort==='oldest') {} else if(curSort==='name_az') guests=[...guests].sort((a,b)=>(a.name||'').localeCompare(b.name||'')); else if(curSort==='name_za') guests=[...guests].sort((a,b)=>(b.name||'').localeCompare(a.name||'')); else if(curSort==='seats_hi') guests=[...guests].sort((a,b)=>(parseInt(b.guests)||1)-(parseInt(a.guests)||1));
+      const tbody=document.getElementById('guestTableBody'); document.getElementById('tableCount').textContent=`Showing ${guests.length} guest${guests.length!==1?'s':''}`; if(guests.length===0){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-inbox"></i> No guests found. Add one manually or share the invitation link!</div></td></tr>`; return;}
+      tbody.innerHTML=''; guests.forEach((g,i)=>{const seats=parseInt(g.guests)||1; const status=g.status; const msgSnip=(g.message||'—').length>40?(g.message||'—').slice(0,40)+'…':(g.message||'—'); const tr=document.createElement('tr'); tr.style.animationDelay=`${i*30}ms`; tr.innerHTML=`<td style="color:var(--text-muted); font-size:.8rem;">${i+1}</td><td><strong>${escHtml(g.name||'—')}</strong></td><td>${status==='attending'?`<span style="font-family:var(--font-serif); font-size:1.2rem; color:var(--gold-light);">${seats}</span>`:`<span style="color:var(--text-muted);">—</span>`}</td><td style="color:var(--text-muted); font-size:.85rem;">${escHtml(g.phone||'—')}</td><td style="color:var(--text-muted); font-size:.82rem;" title="${escHtml(g.message||'')}">${escHtml(msgSnip)}</td><td><select class="status-select" data-id="${g.id}" onchange="changeStatus(this)"><option value="attending" ${status==='attending'?'selected':''}>✅ Attending</option><option value="declined" ${status==='declined'?'selected':''}>❌ Declined</option></select></td><td><button class="tbl-action-btn" title="Edit" onclick="openEditModal('${g.id}')"><i class="fa-solid fa-pen-to-square"></i></button><button class="tbl-action-btn" title="Delete" onclick="confirmDelete('${g.id}','${escHtml(g.name||'')}')"><i class="fa-solid fa-trash-can"></i></button></td>`; tbody.appendChild(tr);}); };
+    const changeStatus=sel=>{const id=sel.dataset.id, val=sel.value; updateGuest(id,{status:val, canAttend: val==='attending'?'Yes':'', cantAttend: val==='declined'?'Yes':''}); renderDashboard(); showToast('Status updated!');};
+    const confirmDelete=(id,name)=>{showConfirm('Delete Guest?',`Remove "${name}" from the guest list? This cannot be undone.`,()=>{deleteGuest(id); renderDashboard(); showToast('Guest removed.', 'warn');});};
+    let editingId=null;
+    const openAddModal=()=>{editingId=null;document.getElementById('guestModalTitle').textContent='Add Guest';document.getElementById('mgName').value='';document.getElementById('mgStatus').value='attending';document.getElementById('mgGuests').value='1';document.getElementById('mgPhone').value='';document.getElementById('mgMessage').value='';document.getElementById('mgSeatGroup').style.display='';document.getElementById('guestModal').classList.add('show');document.getElementById('mgName').focus();};
+    const openEditModal=id=>{const g=getGuests().find(x=>x.id===id); if(!g) return; editingId=id; document.getElementById('guestModalTitle').textContent='Edit Guest'; document.getElementById('mgName').value=g.name||''; document.getElementById('mgStatus').value=g.status||'attending'; document.getElementById('mgGuests').value=String(parseInt(g.guests)||1); document.getElementById('mgPhone').value=g.phone||''; document.getElementById('mgMessage').value=g.message||''; document.getElementById('mgSeatGroup').style.display=g.status==='declined'?'none':''; document.getElementById('guestModal').classList.add('show'); document.getElementById('mgName').focus(); };
+    const closeGuestModal=()=>{document.getElementById('guestModal').classList.remove('show'); editingId=null;};
+    document.getElementById('mgStatus').addEventListener('change',function(){document.getElementById('mgSeatGroup').style.display=this.value==='declined'?'none':'';});
+    document.getElementById('guestModalSave').addEventListener('click',()=>{const name=document.getElementById('mgName').value.trim(); const status=document.getElementById('mgStatus').value; const guests=document.getElementById('mgGuests').value; const phone=document.getElementById('mgPhone').value.trim(); const message=document.getElementById('mgMessage').value.trim(); if(!name){showToast('Please enter a name.', 'error'); return;} const payload={name,status,guests:status==='declined'?'0':guests,phone,message,canAttend:status==='attending'?'Yes':'',cantAttend:status==='declined'?'Yes':''}; if(editingId){updateGuest(editingId,payload); showToast('Guest updated!');} else {addGuest(payload); showToast('Guest added!');} closeGuestModal(); renderDashboard();});
+    document.getElementById('addGuestBtn').addEventListener('click',openAddModal);
+    document.getElementById('guestModalClose').addEventListener('click',closeGuestModal);
+    document.getElementById('guestModalCancel').addEventListener('click',closeGuestModal);
+    document.getElementById('guestModal').addEventListener('click',e=>{if(e.target===e.currentTarget) closeGuestModal();});
+    const openSettings=()=>{const cfg=getConfig(); document.getElementById('sUsername').value=cfg.username||DEFAULT_USER; document.getElementById('sPassword').value=''; document.getElementById('sRSVP').value=cfg.name||'Sheintel'; document.getElementById('sCapacity').value=cfg.capacity||'150'; document.getElementById('sDeadline').value=cfg.deadline||''; document.getElementById('sScriptUrl').value=cfg.scriptUrl||''; document.getElementById('settingsModal').classList.add('show');};
+    const closeSettings=()=>{document.getElementById('settingsModal').classList.remove('show');};
+    document.getElementById('settingsBtn').addEventListener('click',openSettings);
+    document.getElementById('settingsClose').addEventListener('click',closeSettings);
+    document.getElementById('settingsCancel').addEventListener('click',closeSettings);
+    document.getElementById('settingsModal').addEventListener('click',e=>{if(e.target===e.currentTarget) closeSettings();});
+    document.getElementById('settingsSave').addEventListener('click',()=>{const cfg=getConfig(); const newUser=document.getElementById('sUsername').value.trim(); const newPass=document.getElementById('sPassword').value; const name=document.getElementById('sRSVP').value.trim(); const capacity=parseInt(document.getElementById('sCapacity').value)||150; const deadline=document.getElementById('sDeadline').value; const scriptUrl=document.getElementById('sScriptUrl').value.trim(); const upd={...cfg,name:name||'Sheintel',capacity,deadline,scriptUrl}; if(newUser) upd.username=newUser; if(newPass) upd.password=newPass; ls_set(LS_CONFIG,upd); closeSettings(); renderDashboard(); showToast('Settings saved!');});
+    document.getElementById('searchInput').addEventListener('input',e=>{curSearch=e.target.value; renderTable();});
+    document.getElementById('filterStatus').addEventListener('change',e=>{curFilter=e.target.value; renderTable();});
+    document.getElementById('sortBy').addEventListener('change',e=>{curSort=e.target.value; renderTable();});
+    document.getElementById('exportBtn').addEventListener('click',()=>{const guests=getGuests(); if(guests.length===0){showToast('No data to export.', 'warn'); return;} const headers=['#','Name','Status','Seats','Phone','Message','Added']; const rows=guests.map((g,i)=>[i+1,`"${(g.name||'').replace(/"/g,'""')}"`,g.status==='attending'?'Attending':'Declined',g.status==='attending'?parseInt(g.guests)||1:0,`"${(g.phone||'').replace(/"/g,'""')}"`,`"${(g.message||'').replace(/"/g,'""')}"`,g.addedAt?new Date(g.addedAt).toLocaleString():'']); const csv=[headers,...rows].map(r=>r.join(',')).join('\r\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`sheintel18_rsvp_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); showToast('CSV exported!');});
+    document.getElementById('clearAllBtn').addEventListener('click',()=>{const guests=getGuests(); if(guests.length===0){showToast('No data to clear.', 'warn'); return;} showConfirm('Clear All Guests?',`This will permanently delete all ${guests.length} entries. This cannot be undone.`,()=>{saveGuests([]); renderDashboard(); showToast('All guests cleared.', 'warn');});});
+    document.getElementById('refreshBtn').addEventListener('click',()=>{renderDashboard(); showToast('Dashboard refreshed!');});
+    const renderDashboard=()=>{migrateGuests(); const guests=getGuests(); renderStats(guests); renderTable();};
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGuestModal(); closeSettings(); document.getElementById('confirmDialog').classList.remove('show');}});
+    // Auto-init stars
+    (function(){const c=document.getElementById('stars');const num=window.innerWidth<768?40:100;for(let i=0;i<num;i++){const s=document.createElement('div');s.className='star';s.style.width=s.style.height=(1+Math.random()*2)+'px';s.style.top=Math.random()*100+'%';s.style.left=Math.random()*100+'%';s.style.setProperty('--dur',(2+Math.random()*5)+'s');c.appendChild(s);}})();
+  </script>
+</body>
+</html>
