@@ -15,22 +15,6 @@ import {
   Check,
   Feather,
 } from "lucide-react";
-import gallery1 from "@/assets/gallery-1.jpg.asset.json";
-import gallery2 from "@/assets/gallery-2.jpg.asset.json";
-import gallery3 from "@/assets/gallery-3.jpg.asset.json";
-import gallery4 from "@/assets/gallery-4.jpg.asset.json";
-import gallery5 from "@/assets/gallery-5.jpg.asset.json";
-import gallery6 from "@/assets/gallery-6.jpg.asset.json";
-import gallery7 from "@/assets/gallery-7.jpg.asset.json";
-import gallery8 from "@/assets/gallery-8.jpg.asset.json";
-import gallery9 from "@/assets/gallery-9.jpg.asset.json";
-import gallery10 from "@/assets/gallery-10.jpg.asset.json";
-import gallery11 from "@/assets/gallery-11.jpg.asset.json";
-import gallery12 from "@/assets/gallery-12.jpg.asset.json";
-import qrClientEpic from "@/assets/qr-client-epic.jpg.asset.json";
-import celebrantAsset from "@/assets/celebrant.jpg.asset.json";
-import dressMale from "@/assets/dress-male.png.asset.json";
-import dressFemale from "@/assets/dress-female.png.asset.json";
 import GoldConfetti from "@/components/GoldConfetti";
 import { getSheetConfig, submitRsvpToSheet, type RsvpAttendance } from "@/lib/rsvp-sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,18 +58,18 @@ const roses = [
 ];
 
 const galleryImgs = [
-  gallery1.url,
-  gallery2.url,
-  gallery3.url,
-  gallery4.url,
-  gallery5.url,
-  gallery6.url,
-  gallery7.url,
-  gallery8.url,
-  gallery9.url,
-  gallery10.url,
-  gallery11.url,
-  gallery12.url,
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/f89f2d04-f5c1-4c46-a054-918a981edab0/gallery-1.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/0e111283-cf00-4e3c-917a-32e0b539840e/gallery-2.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/8046e75d-329e-4dbb-86b3-e23eaea78404/gallery-3.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/18688388-ca67-4cb7-a0b4-7ee1038255ec/gallery-4.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/4a7cf609-d1ae-4569-b0d1-671560627398/gallery-5.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/cc51bfc8-4373-407c-8bed-90c8afd962bc/gallery-6.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/4e331b1b-321f-44fd-8c1b-eca11b3820c6/gallery-7.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/7f926543-089f-4b14-97bd-47a7d5c1b84c/gallery-8.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/ea3e832d-9c88-4e58-a958-af235de43215/gallery-9.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/0596f5a2-c1be-409e-8955-98e5e42de4fb/gallery-10.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/acf00d22-98e9-44fe-8032-f23d6e86e2b4/gallery-11.jpg",
+  "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/e8e0fdcc-46f5-4571-bd29-8a4476890f2a/gallery-12.jpg",
 ];
 
 const wishIconMap = { Heart, Sparkles, Star, Flower2, Gem, PartyPopper, Feather, Send } as const;
@@ -230,7 +214,7 @@ function About() {
           <div className="relative">
             <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" />
             <img
-              src={celebrantAsset.url}
+              src="/celebrant.png"
               alt="Portrait of Sheintel"
               className="relative rounded-2xl w-full object-cover aspect-[3/4] border border-border"
             />
@@ -340,8 +324,8 @@ function Outfits() {
 
         <div className="grid grid-cols-2 gap-6 md:gap-10 max-w-3xl mx-auto">
           {[
-            { img: dressMale.url, label: "Gentlemen" },
-            { img: dressFemale.url, label: "Ladies" },
+            { img: "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/261bf55f-337c-4c8c-83c4-b626e299ce49/dress-male.png", label: "Gentlemen" },
+            { img: "https://whisper-blossom-craft.lovable.app/__l5e/assets-v1/64a8bee5-fa51-43d2-8ffc-65bda965e17f/dress-female.png", label: "Ladies" },
           ].map((d) => (
             <div key={d.label} className="rounded-2xl border border-border bg-card backdrop-blur-md overflow-hidden">
               <div className="aspect-[3/4] flex items-end justify-center bg-gradient-to-b from-primary/5 to-transparent p-4">
@@ -697,7 +681,7 @@ function Gift() {
     <section id="gift" className="relative py-24 px-6 overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${celebrantAsset.url})`, backgroundPosition: "center 20%" }}
+        style={{ backgroundImage: "url(/celebrant.png)", backgroundPosition: "center 20%" }}
         aria-hidden
       />
       <div className="absolute inset-0 bg-background/45" aria-hidden />
