@@ -244,8 +244,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Supabase Configuration (kept optional so the dashboard still works without it)
-    const SUPABASE_URL = 'https://eluyhzqlkupamfqhzpif.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsdXloenFsa3VwYW1mcWh6cGlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2NDA4MTMsImV4cCI6MjAyNTIxNjgxM30.H7E-waDOJvOZTOPl1KvlXk1a6XsNqYpRGLU9CqKR3E4';
+    const SUPABASE_URL = 'https://lhkmeflfmwphlamyitzl.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxoa21lZmxmbXdwaGxhbXlpdHpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDY4NzYsImV4cCI6MjA5OTc4Mjg3Nn0.EZahcyZ5sMXzsYz0-FNebU91d-OuvPxELVtqVCMGuzw';
     const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
       : null;
@@ -275,6 +275,7 @@
     window._ls_set = ls_set;
 
     const RSVP_SUBMISSIONS_KEY = 'rsvp_submissions';
+    const RSVP_SUPABASE_TABLE = 'rsvp_submissions';
     const RSVP_SHEET_EXPORT_URL = 'https://docs.google.com/spreadsheets/d/1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI/export?format=csv&gid=0';
 
     const parseCsv = (text) => {
@@ -357,6 +358,30 @@
       }
     };
 
+    const normalizeSupabaseGuest = (row) => ({
+      id: row.id,
+      name: row.name || '',
+      guests: parseInt(row.guests, 10) || 1,
+      phone: row.phone || '',
+      message: row.message || '',
+      status: row.status === 'declined' ? 'declined' : 'attending',
+      canAttend: row.can_attend || (row.status === 'attending' ? 'Yes' : ''),
+      cantAttend: row.cant_attend || (row.status === 'declined' ? 'Yes' : ''),
+      addedAt: row.added_at || row.addedAt || new Date().toISOString(),
+    });
+
+    const loadGuestsFromSupabase = async () => {
+      if (!supabaseClient) return [];
+      const { data, error } = await supabaseClient
+        .from(RSVP_SUPABASE_TABLE)
+        .select('*')
+        .order('added_at', { ascending: false });
+      if (error) {
+        throw error;
+      }
+      return (data || []).map(normalizeSupabaseGuest);
+    };
+
     const loadGuestsFromSheet = async () => {
       const response = await fetch(RSVP_SHEET_EXPORT_URL, { cache: 'no-store' });
       if (!response.ok) {
@@ -388,6 +413,14 @@
     const fetchGuests = async () => {
       isLoading = true;
       try {
+        const remoteGuests = await loadGuestsFromSupabase();
+        if (remoteGuests.length > 0) {
+          guestsCache = remoteGuests;
+          localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(remoteGuests));
+          isLoading = false;
+          return guestsCache;
+        }
+
         const localGuests = loadGuestsFromLocalStorage();
         if (localGuests.length > 0) {
           guestsCache = localGuests;
@@ -410,18 +443,30 @@
     const addGuest = async (guest) => {
       try {
         const payload = {
-          id: 'manual-' + Date.now(),
           name: guest.name,
-          guests: parseInt(guest.guests, 10) || 1,
+          guests: String(parseInt(guest.guests, 10) || 1),
           phone: guest.phone,
           message: guest.message,
           status: guest.status === 'declined' ? 'declined' : 'attending',
-          addedAt: new Date().toISOString(),
+          can_attend: guest.status === 'attending' ? 'Yes' : '',
+          cant_attend: guest.status === 'declined' ? 'Yes' : '',
         };
 
         const existing = loadGuestsFromLocalStorage();
-        const next = [payload, ...existing];
-        localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from(RSVP_SUPABASE_TABLE)
+            .insert(payload)
+            .select('*')
+            .single();
+          if (error) throw error;
+          const normalized = normalizeSupabaseGuest(data);
+          const next = [normalized, ...existing.filter((entry) => entry.id !== normalized.id)];
+          localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
+        } else {
+          const next = [{ ...payload, id: 'manual-' + Date.now() }, ...existing];
+          localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
+        }
         await fetchGuests();
         return true;
       } catch (error) {
@@ -434,16 +479,36 @@
     const updateGuest = async (id, patch) => {
       try {
         const existing = loadGuestsFromLocalStorage();
-        const next = existing.map((guest) => guest.id === id ? {
-          ...guest,
-          name: patch.name,
-          guests: parseInt(patch.guests, 10) || 1,
-          phone: patch.phone,
-          message: patch.message,
-          status: patch.status === 'declined' ? 'declined' : 'attending',
-        } : guest);
-
-        localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from(RSVP_SUPABASE_TABLE)
+            .update({
+              name: patch.name,
+              guests: String(parseInt(patch.guests, 10) || 1),
+              phone: patch.phone,
+              message: patch.message,
+              status: patch.status === 'declined' ? 'declined' : 'attending',
+              can_attend: patch.status === 'attending' ? 'Yes' : '',
+              cant_attend: patch.status === 'declined' ? 'Yes' : '',
+            })
+            .eq('id', id)
+            .select('*')
+            .single();
+          if (error) throw error;
+          const normalized = normalizeSupabaseGuest(data);
+          const next = existing.map((guest) => guest.id === id ? normalized : guest);
+          localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
+        } else {
+          const next = existing.map((guest) => guest.id === id ? {
+            ...guest,
+            name: patch.name,
+            guests: parseInt(patch.guests, 10) || 1,
+            phone: patch.phone,
+            message: patch.message,
+            status: patch.status === 'declined' ? 'declined' : 'attending',
+          } : guest);
+          localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
+        }
         await fetchGuests();
         return true;
       } catch (error) {
@@ -455,6 +520,10 @@
 
     const deleteGuest = async (id) => {
       try {
+        if (supabaseClient) {
+          const { error } = await supabaseClient.from(RSVP_SUPABASE_TABLE).delete().eq('id', id);
+          if (error) throw error;
+        }
         const existing = loadGuestsFromLocalStorage();
         const next = existing.filter((guest) => guest.id !== id);
         localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));

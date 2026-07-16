@@ -420,6 +420,28 @@ function Rsvp() {
     setMessage("");
   };
 
+  const saveRsvpToSupabase = async (payload: {
+    name: string;
+    phone: string;
+    guests: string;
+    message: string;
+    attendance: RsvpAttendance;
+  }) => {
+    const { error } = await supabase.from("rsvp_submissions").insert({
+      name: payload.name,
+      phone: payload.phone,
+      guests: payload.guests,
+      message: payload.message,
+      status: payload.attendance,
+      can_attend: payload.attendance === "attending" ? "Yes" : "",
+      cant_attend: payload.attendance === "declined" ? "Yes" : "",
+    });
+
+    if (error) {
+      throw error;
+    }
+  };
+
   // Save submission to localStorage so the dashboard console sees it
   const saveToLocalStorage = (payload: {
     name: string;
@@ -469,6 +491,12 @@ function Rsvp() {
       phone: entry.phone,
       message: entry.message,
     });
+
+    try {
+      await saveRsvpToSupabase(entry);
+    } catch (_error) {
+      console.error("Supabase RSVP submission failed");
+    }
 
     // Write to Google Sheet via the deployed Apps Script
     try {

@@ -35,6 +35,45 @@ export type Database = {
         }
         Relationships: []
       }
+      rsvp_submissions: {
+        Row: {
+          added_at: string
+          can_attend: string
+          cant_attend: string
+          guests: string
+          id: string
+          message: string
+          name: string
+          phone: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          added_at?: string
+          can_attend?: string
+          cant_attend?: string
+          guests?: string
+          id?: string
+          message?: string
+          name: string
+          phone?: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          added_at?: string
+          can_attend?: string
+          cant_attend?: string
+          guests?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wishes: {
         Row: {
           created_at: string
