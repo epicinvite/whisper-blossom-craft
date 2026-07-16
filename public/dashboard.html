@@ -247,10 +247,11 @@
     const LS_SHEET_CONFIG = 'rsvp_sheet_config';
     const DEFAULT_USER = 'sheintel';
     const DEFAULT_PASS = '082226';
+    const DEFAULT_SHEET_CONFIG = { sheetId: '1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI', csvUrl: 'https://docs.google.com/spreadsheets/d/1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI/export?format=csv&gid=0', scriptUrl: '', dashboardUsername: DEFAULT_USER, dashboardPassword: DEFAULT_PASS };
     const RSVP_SHEET_EDIT_URL = 'https://docs.google.com/spreadsheets/d/1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI/edit';
 
     // Pre-populate sheet config if not set so the live site form can write to the sheet
-    (function(){try{if(!localStorage.getItem(LS_SHEET_CONFIG)){localStorage.setItem(LS_SHEET_CONFIG,JSON.stringify({sheetId:'1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI',csvUrl:'https://docs.google.com/spreadsheets/d/1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI/export?format=csv&gid=0',scriptUrl:'',dashboardUsername:'sheintel',dashboardPassword:'082226'}));}}catch(e){}})();
+    (function(){try{if(!localStorage.getItem(LS_SHEET_CONFIG)){localStorage.setItem(LS_SHEET_CONFIG,JSON.stringify(DEFAULT_SHEET_CONFIG));}}catch(e){}})();
     const ls_get = (k,def)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def};};
     const ls_set = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{};};
 
@@ -268,7 +269,9 @@
     const showToast=(msg,type)=>{if(!type)type='success';const toast=document.getElementById('toast'),icon=document.getElementById('toastIcon'),txt=document.getElementById('toastMsg');txt.textContent=msg;icon.className=type==='success'?'fa-solid fa-circle-check':type==='error'?'fa-solid fa-circle-xmark':'fa-solid fa-triangle-exclamation';toast.className='toast show '+type;clearTimeout(toast._t);toast._t=setTimeout(function(){toast.className='toast';},4000);};
     const showConfirm=(title,msg,ok)=>{document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;var dlg=document.getElementById('confirmDialog');dlg.classList.add('show');var okBtn=document.getElementById('confirmOk'),cancelBtn=document.getElementById('confirmCancel');var close=function(){dlg.classList.remove('show');};okBtn.onclick=function(){close();ok();};cancelBtn.onclick=close;};
     const migrateGuests=()=>{var g=ls_get(LS_RSVP,[]),changed=false;g.forEach(function(x){if(!x.id){x.id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);changed=true;}if(!x.addedAt){x.addedAt=new Date().toISOString();changed=true;}if(x.canAttend==='Yes'){x.status='attending';changed=true;}else if(x.cantAttend==='Yes'){x.status='declined';changed=true;}else if(!x.status){x.status='attending';changed=true;}if(x.guests===undefined){x.guests=x.guestCount||1;changed=true;}});if(changed)ls_set(LS_RSVP,g);};
-    const getConfig=()=>ls_get(LS_CONFIG,{});
+    const getSheetConfig=function(){return {...DEFAULT_SHEET_CONFIG,...ls_get(LS_SHEET_CONFIG,{})};};
+    const saveSheetConfig=function(patch){var next={...getSheetConfig(),...patch}; ls_set(LS_SHEET_CONFIG,next); return next;};
+    const getConfig=function(){var legacy=ls_get(LS_CONFIG,{}); var sheet=getSheetConfig(); return {...sheet,...legacy,username:legacy.username||sheet.dashboardUsername||DEFAULT_USER,password:legacy.password||sheet.dashboardPassword||DEFAULT_PASS,name:legacy.name||sheet.name||'Sheintel',capacity:legacy.capacity||sheet.capacity||150,deadline:legacy.deadline||sheet.deadline||'',scriptUrl:legacy.scriptUrl||sheet.scriptUrl||''};};
     const getGuests=()=>ls_get(LS_RSVP,[]);
     const saveGuests=function(a){ls_set(LS_RSVP,a);};
     const addGuest=function(guest){var arr=getGuests();arr.push({...guest,id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),addedAt:new Date().toISOString()});saveGuests(arr);};
@@ -329,7 +332,7 @@
     document.getElementById('settingsClose').addEventListener('click',closeSettings);
     document.getElementById('settingsCancel').addEventListener('click',closeSettings);
     document.getElementById('settingsModal').addEventListener('click',function(e){if(e.target===e.currentTarget) closeSettings();});
-    document.getElementById('settingsSave').addEventListener('click',function(){var cfg=getConfig(); var newUser=document.getElementById('sUsername').value.trim(); var newPass=document.getElementById('sPassword').value; var name=document.getElementById('sRSVP').value.trim(); var capacity=parseInt(document.getElementById('sCapacity').value)||150; var deadline=document.getElementById('sDeadline').value; var scriptUrl=document.getElementById('sScriptUrl').value.trim(); var upd={...cfg,name:name||'Sheintel',capacity:capacity,deadline:deadline,scriptUrl:scriptUrl}; if(newUser) upd.username=newUser; if(newPass) upd.password=newPass; ls_set(LS_CONFIG,upd); try{var sc=JSON.parse(localStorage.getItem(LS_SHEET_CONFIG)||'{}');sc.scriptUrl=scriptUrl;localStorage.setItem(LS_SHEET_CONFIG,JSON.stringify(sc));}catch(e){} closeSettings(); renderDashboard(); showToast('Settings saved!');});
+    document.getElementById('settingsSave').addEventListener('click',function(){var cfg=getConfig(); var newUser=document.getElementById('sUsername').value.trim(); var newPass=document.getElementById('sPassword').value; var name=document.getElementById('sRSVP').value.trim(); var capacity=parseInt(document.getElementById('sCapacity').value)||150; var deadline=document.getElementById('sDeadline').value; var scriptUrl=document.getElementById('sScriptUrl').value.trim(); var upd={...cfg,name:name||'Sheintel',capacity:capacity,deadline:deadline,scriptUrl:scriptUrl}; if(newUser) upd.username=newUser; if(newPass) upd.password=newPass; ls_set(LS_CONFIG,upd); saveSheetConfig({sheetId:upd.sheetId||DEFAULT_SHEET_CONFIG.sheetId,csvUrl:upd.csvUrl||DEFAULT_SHEET_CONFIG.csvUrl,scriptUrl:upd.scriptUrl,dashboardUsername:upd.username||DEFAULT_USER,dashboardPassword:upd.password||DEFAULT_PASS,name:upd.name,capacity:upd.capacity,deadline:upd.deadline}); closeSettings(); renderDashboard(); showToast('Settings saved!');});
 
     // ---------- Search & Filter ----------
     document.getElementById('searchInput').addEventListener('input',function(e){curSearch=e.target.value; renderTable();});

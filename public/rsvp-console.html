@@ -243,11 +243,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Supabase Configuration
+    // Supabase Configuration (kept optional so the dashboard still works without it)
     const SUPABASE_URL = 'https://eluyhzqlkupamfqhzpif.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsdXloenFsa3VwYW1mcWh6cGlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2NDA4MTMsImV4cCI6MjAyNTIxNjgxM30.H7E-waDOJvOZTOPl1KvlXk1a6XsNqYpRGLU9CqKR3E4';
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+      : null;
 
     const LS_CONFIG = 'rsvp_celebrant_config';
     const DEFAULT_USER = 'sheintel';
@@ -256,19 +257,125 @@
     const ls_get = (k,def)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def};};
     const ls_set = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{};};
 
+    function escHtml(s) {
+      let a = String(s ?? '');
+      a = a.replace(/&/g, String.fromCharCode(38) + 'amp;');
+      a = a.replace(/</g, String.fromCharCode(38) + 'lt;');
+      a = a.replace(/>/g, String.fromCharCode(38) + 'gt;');
+      a = a.replace(/"/g, String.fromCharCode(38) + 'quot;');
+      a = a.replace(/'/g, String.fromCharCode(38) + '#' + 'x27;');
+      return a;
+    }
+
     // Expose global helpers for onclick handlers
     window._LS_CONFIG = LS_CONFIG;
     window._DEFAULT_USER = DEFAULT_USER;
     window._DEFAULT_PASS = DEFAULT_PASS;
     window._ls_get = ls_get;
     window._ls_set = ls_set;
-      var a=String(s);
-      a=a.replace(/&/g,String.fromCharCode(38)+'amp;');
-      a=a.replace(/</g,String.fromCharCode(38)+'lt;');
-      a=a.replace(/>/g,String.fromCharCode(38)+'gt;');
-      a=a.replace(/"/g,String.fromCharCode(38)+'quot;');
-      a=a.replace(/'/g,String.fromCharCode(38)+'#'+'x27;');
-      return a;
+
+    const RSVP_SUBMISSIONS_KEY = 'rsvp_submissions';
+    const RSVP_SHEET_EXPORT_URL = 'https://docs.google.com/spreadsheets/d/1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI/export?format=csv&gid=0';
+
+    const parseCsv = (text) => {
+      const rows = [];
+      let row = [];
+      let entry = '';
+      let insideQuote = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+          if (insideQuote && nextChar === '"') {
+            entry += '"';
+            i++;
+          } else {
+            insideQuote = !insideQuote;
+          }
+          continue;
+        }
+
+        if (char === ',' && !insideQuote) {
+          row.push(entry);
+          entry = '';
+          continue;
+        }
+
+        if ((char === '\n' || char === '\r') && !insideQuote) {
+          if (char === '\r' && nextChar === '\n') {
+            i++;
+          }
+          row.push(entry);
+          if (row.some((value) => value.trim() !== '')) {
+            rows.push(row);
+          }
+          row = [];
+          entry = '';
+          continue;
+        }
+
+        entry += char;
+      }
+
+      if (entry !== '' || row.length > 0) {
+        row.push(entry);
+        if (row.some((value) => value.trim() !== '')) {
+          rows.push(row);
+        }
+      }
+
+      return rows;
+    };
+
+    const normalizeGuestStatus = (row) => {
+      const values = [row[4], row[5], row[6], row[7]].join(' ').toLowerCase();
+      if (values.includes('declined') || values.includes('cant') || values.includes('no')) {
+        return 'declined';
+      }
+      return 'attending';
+    };
+
+    const loadGuestsFromLocalStorage = () => {
+      try {
+        const raw = localStorage.getItem(RSVP_SUBMISSIONS_KEY);
+        if (!raw) return [];
+        const stored = JSON.parse(raw);
+        return (stored || []).map((entry, index) => ({
+          id: entry.id || 'local-' + index,
+          name: entry.name || '',
+          guests: parseInt(entry.guests, 10) || 1,
+          phone: entry.phone || '',
+          message: entry.message || '',
+          status: entry.status === 'declined' ? 'declined' : 'attending',
+          addedAt: entry.addedAt || new Date().toISOString(),
+        }));
+      } catch (error) {
+        console.warn('Unable to read local RSVP data:', error);
+        return [];
+      }
+    };
+
+    const loadGuestsFromSheet = async () => {
+      const response = await fetch(RSVP_SHEET_EXPORT_URL, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Unable to load the sheet export.');
+      }
+
+      const csv = await response.text();
+      const rows = parseCsv(csv);
+      if (rows.length <= 1) return [];
+
+      return rows.slice(1).filter((row) => (row[1] || '').trim()).map((row, index) => ({
+        id: 'sheet-' + (index + 1),
+        name: (row[1] || '').trim(),
+        guests: parseInt(row[2], 10) || 1,
+        phone: (row[3] || '').trim(),
+        message: (row[4] || '').trim(),
+        status: normalizeGuestStatus(row),
+        addedAt: row[0] || new Date().toISOString(),
+      }));
     };
 
     let guestsCache = [];
@@ -278,49 +385,43 @@
     
     const showConfirm=(title,msg,ok)=>{document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;var dlg=document.getElementById('confirmDialog');dlg.classList.add('show');var okBtn=document.getElementById('confirmOk'),cancelBtn=document.getElementById('confirmCancel');var close=function(){dlg.classList.remove('show');};okBtn.onclick=function(){close();ok();};cancelBtn.onclick=close;};
 
-    // Supabase operations
     const fetchGuests = async () => {
+      isLoading = true;
       try {
-        isLoading = true;
-        const { data, error } = await supabase
-          .from('rsvp_responses')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        guestsCache = (data || []).map(g => ({
-          id: g.id,
-          name: g.name || '',
-          guests: g.seats || 1,
-          phone: g.phone || '',
-          message: g.message || '',
-          status: g.status === 'declined' ? 'declined' : 'attending',
-          addedAt: g.created_at
-        }));
+        const localGuests = loadGuestsFromLocalStorage();
+        if (localGuests.length > 0) {
+          guestsCache = localGuests;
+          isLoading = false;
+          return guestsCache;
+        }
+
+        const sheetGuests = await loadGuestsFromSheet();
+        guestsCache = sheetGuests;
         isLoading = false;
         return guestsCache;
       } catch (error) {
-        console.error('Error fetching guests:', error);
+        console.error('Error loading guests:', error);
         isLoading = false;
-        showToast('Error loading guests: ' + error.message, 'error');
-        return [];
+        showToast('Unable to load the guest list yet. Please refresh or add a guest manually.', 'warn');
+        return guestsCache;
       }
     };
 
     const addGuest = async (guest) => {
       try {
-        const { data, error } = await supabase
-          .from('rsvp_responses')
-          .insert([{
-            name: guest.name,
-            seats: parseInt(guest.guests) || 1,
-            phone: guest.phone,
-            message: guest.message,
-            status: guest.status === 'declined' ? 'declined' : 'attending'
-          }])
-          .select();
-        
-        if (error) throw error;
+        const payload = {
+          id: 'manual-' + Date.now(),
+          name: guest.name,
+          guests: parseInt(guest.guests, 10) || 1,
+          phone: guest.phone,
+          message: guest.message,
+          status: guest.status === 'declined' ? 'declined' : 'attending',
+          addedAt: new Date().toISOString(),
+        };
+
+        const existing = loadGuestsFromLocalStorage();
+        const next = [payload, ...existing];
+        localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
         await fetchGuests();
         return true;
       } catch (error) {
@@ -332,18 +433,17 @@
 
     const updateGuest = async (id, patch) => {
       try {
-        const { error } = await supabase
-          .from('rsvp_responses')
-          .update({
-            name: patch.name,
-            seats: parseInt(patch.guests) || 1,
-            phone: patch.phone,
-            message: patch.message,
-            status: patch.status === 'declined' ? 'declined' : 'attending'
-          })
-          .eq('id', id);
-        
-        if (error) throw error;
+        const existing = loadGuestsFromLocalStorage();
+        const next = existing.map((guest) => guest.id === id ? {
+          ...guest,
+          name: patch.name,
+          guests: parseInt(patch.guests, 10) || 1,
+          phone: patch.phone,
+          message: patch.message,
+          status: patch.status === 'declined' ? 'declined' : 'attending',
+        } : guest);
+
+        localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
         await fetchGuests();
         return true;
       } catch (error) {
@@ -355,12 +455,9 @@
 
     const deleteGuest = async (id) => {
       try {
-        const { error } = await supabase
-          .from('rsvp_responses')
-          .delete()
-          .eq('id', id);
-        
-        if (error) throw error;
+        const existing = loadGuestsFromLocalStorage();
+        const next = existing.filter((guest) => guest.id !== id);
+        localStorage.setItem(RSVP_SUBMISSIONS_KEY, JSON.stringify(next));
         await fetchGuests();
         return true;
       } catch (error) {

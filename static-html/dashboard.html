@@ -274,6 +274,7 @@
   <script>
     const LS_RSVP = 'rsvp_submissions';
     const LS_CONFIG = 'rsvp_celebrant_config';
+    const LS_SHEET_CONFIG = 'rsvp_sheet_config';
     const SHEET_ID = '1F9lVoqH-RSYylYAkqpn2LY6ZOhXut5c8CuK75BjhtVI';
     const DEFAULT_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
     const DEFAULT_CONFIG = {
@@ -288,6 +289,16 @@
     };
     const DEFAULT_USER = 'sheintel';
     const DEFAULT_PASS = '082226';
+    const DEFAULT_SHEET_CONFIG = {
+      sheetId: SHEET_ID,
+      csvUrl: DEFAULT_SHEET_CSV_URL,
+      scriptUrl: '',
+      dashboardUsername: DEFAULT_USER,
+      dashboardPassword: DEFAULT_PASS,
+      name: 'Sheintel',
+      capacity: 150,
+      deadline: '',
+    };
     const CIRCUMFERENCE = 2 * Math.PI * 48;
     const ls_get = (k,def)=>{try{let v=localStorage.getItem(k);return v?JSON.parse(v):def}catch{return def};};
     const ls_set = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{};};
@@ -344,8 +355,8 @@
     const showToast=(msg,type='success')=>{const toast=document.getElementById('toast'),icon=document.getElementById('toastIcon'),txt=document.getElementById('toastMsg');txt.textContent=msg;icon.className=type==='success'?'fa-solid fa-circle-check':type==='error'?'fa-solid fa-circle-xmark':'fa-solid fa-triangle-exclamation';toast.className='toast show '+type;clearTimeout(toast._t);toast._t=setTimeout(()=>toast.className='toast',4000);};
     const showConfirm=(title,msg,ok)=>{document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;const dlg=document.getElementById('confirmDialog');dlg.classList.add('show');const okBtn=document.getElementById('confirmOk'),cancelBtn=document.getElementById('confirmCancel');const close=()=>dlg.classList.remove('show');okBtn.onclick=()=>{close();ok();};cancelBtn.onclick=close;};
     const migrateGuests=()=>{let g=ls_get(LS_RSVP,[]),changed=false;g.forEach(x=>{if(!x.id){x.id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);changed=true;}if(!x.addedAt){x.addedAt=new Date().toISOString();changed=true;}if(x.canAttend==='Yes'){x.status='attending';changed=true;}else if(x.cantAttend==='Yes'){x.status='declined';changed=true;}else if(!x.status){x.status='attending';changed=true;}if(x.guests===undefined){x.guests=x.guestCount||1;changed=true;}});if(changed)ls_set(LS_RSVP,g);};
-    const getConfig=()=>{const stored=ls_get(LS_CONFIG,null); const cfg={...DEFAULT_CONFIG,...(stored||{})}; if(!stored) ls_set(LS_CONFIG,cfg); return cfg;};
-    const saveConfig=(cfg)=>ls_set(LS_CONFIG,{...DEFAULT_CONFIG,...cfg});
+    const getConfig=()=>{const stored=ls_get(LS_CONFIG,null); const sheet=ls_get(LS_SHEET_CONFIG,null); const cfg={...DEFAULT_CONFIG,...DEFAULT_SHEET_CONFIG,...(sheet||{}),...(stored||{})}; if(!stored) ls_set(LS_CONFIG,cfg); if(!sheet) ls_set(LS_SHEET_CONFIG,{sheetId:cfg.sheetId||SHEET_ID,csvUrl:cfg.csvUrl||DEFAULT_SHEET_CSV_URL,scriptUrl:cfg.scriptUrl||'',dashboardUsername:cfg.username||DEFAULT_USER,dashboardPassword:cfg.password||DEFAULT_PASS,name:cfg.name||'Sheintel',capacity:cfg.capacity||150,deadline:cfg.deadline||''}); return cfg;};
+    const saveConfig=(cfg)=>{const next={...DEFAULT_CONFIG,...cfg}; ls_set(LS_CONFIG,next); ls_set(LS_SHEET_CONFIG,{sheetId:next.sheetId||SHEET_ID,csvUrl:next.csvUrl||DEFAULT_SHEET_CSV_URL,scriptUrl:next.scriptUrl||'',dashboardUsername:next.username||DEFAULT_USER,dashboardPassword:next.password||DEFAULT_PASS,name:next.name||'Sheintel',capacity:next.capacity||150,deadline:next.deadline||''}); return next;};
     const getGuests=()=>ls_get(LS_RSVP,[]);
     const saveGuests=a=>ls_set(LS_RSVP,a);
     const normalizeRemoteGuest = (guest, rowNumber) => {
